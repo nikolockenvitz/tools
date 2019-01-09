@@ -13,7 +13,7 @@ class Lock:
     def createWindow(self):
         self.root = Tk()
         self.root.overrideredirect(True)
-        self.root.geometry("10x10+0+0")
+        self.root.geometry("5x5+0+0")
         self.root.attributes("-topmost",True)
 
     def setLockState(self, state=True):
@@ -22,7 +22,7 @@ class Lock:
 
     def setBindings(self):
         self.root.bind("<Button-1>", self.activateLocking)
-        self.root.bind("<Button-3>", self.exit)
+        self.root.bind("<ButtonRelease-3>", self.exit)
         self.root.bind("<FocusOut>", self.lock)
 
     def activateLocking(self, event=None):
@@ -30,7 +30,7 @@ class Lock:
         self.root.focus()
 
     def exit(self, event=None):
-        if(self.lockState == True): return
+        if(self.lockState != False): return
         self.root.destroy()
 
     def lock(self, event=None):
