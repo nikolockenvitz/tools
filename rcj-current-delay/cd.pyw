@@ -1,12 +1,22 @@
 from tkinter import *
+import ctypes
 
 class UI:
     def __init__(self):
+        self.createWindow()
+        self.createLabels()
+        self.initLock()
+
+        self.root.mainloop()
+
+    def createWindow(self):
         self.bg = "white"
         self.fgText = "black"
         self.fgDelayed = "red"
         self.fgInTime = "black"
         self.fgAhead = "green"
+        self.fgControl = "black"
+        self.fgControlLockState = "red"
         
         self.fontArena = ("Arial", "18")
         self.fontDelay = ("Arial", "64")
@@ -16,10 +26,12 @@ class UI:
         self.setPosition(0, 600)
         self.root.config(bg=self.bg)
         self.root.attributes("-alpha",0.8)
+        self.root.resizable(False, False)
 
+    def createLabels(self):
         self.frames = []
         self.labelsArena = []
-        self.arenas = ["Entry 1","Entry 2","Line 1","Line 2"]
+        self.arenas = ["Line 1","Line 2","Entry 1","Entry 2"]
         self.labelsDelay = []
         self.delays = [0, 0, 0, 0]
         for i in range(4):
@@ -39,15 +51,13 @@ class UI:
 
         self.updateLabelsDelay()
 
-        self.control = Frame(self.root, bg="black")
+        self.control = Frame(self.root, bg=self.fgControl)
         self.control.place(x=348,y=20,width=4,height=160)
         self.dnd = False
         self.control.bind("<Button-1>",        self.buttonPressed)
         self.control.bind("<ButtonRelease-1>", self.buttonReleased)
         self.control.bind("<B1-Motion>",       self.moveWindow)
         self.control.bind("<Button-3>",        self.changeState)
-
-        self.root.mainloop()
 
     def updateLabelsDelay(self):
         for i in range(4):
@@ -82,6 +92,28 @@ class UI:
     def changeState(self, event):
         self.root.overrideredirect(not self.root.overrideredirect())
         self.root.attributes("-topmost", self.root.overrideredirect())
+
+    """ Following part is for locking similiar to ../lock.pyw """
+    def initLock(self):
+        self.setLockState(False)
+        self.setLockBindings()
+
+    def setLockState(self, state=True):
+        self.lockState = state
+        self.control.config(bg=self.fgControlLockState if state == True else self.fgControl)
+
+    def setLockBindings(self):
+        self.root.bind("<Control-l>", self.activateLocking)
+        self.root.bind("<FocusOut>", self.lock)
+
+    def activateLocking(self, event=None):
+        self.setLockState(True)
+        self.root.focus()
+
+    def lock(self, event=None):
+        if(self.lockState == False): return
+        ctypes.windll.user32.LockWorkStation()
+        self.setLockState(False)
         
 
 if __name__ == "__main__":
