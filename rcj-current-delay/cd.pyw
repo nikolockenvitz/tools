@@ -49,6 +49,13 @@ class UI:
         self.labelsDelay[2].bind("<Button>", lambda event: self.clicked(event, 2))
         self.labelsDelay[3].bind("<Button>", lambda event: self.clicked(event, 3))
 
+        self.labelDescription= Label(self.root, text="Aktuelle Verspätung / Current Delay", font=self.fontArena, bg=self.bg)
+        self.labelDescription.place(x=0,y=0)
+        self.labelDescription.update()
+        w = self.labelDescription.winfo_width()
+        self.labelDescription.place_forget()
+        self.labelDescription.place(x=350-w//2, y=200)
+
         self.updateLabelsDelay()
 
         self.control = Frame(self.root, bg=self.fgControl)
@@ -87,7 +94,7 @@ class UI:
     def setPosition(self, x, y):
         self.x = x
         self.y = y
-        self.root.geometry("700x200+"+str(self.x)+"+"+str(self.y))
+        self.root.geometry("700x250+"+str(self.x)+"+"+str(self.y))
 
     def changeState(self, event):
         self.root.overrideredirect(not self.root.overrideredirect())
