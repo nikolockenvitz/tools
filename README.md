@@ -51,6 +51,6 @@ Currently this repository includes following files and folders:
   The easiest way to remember them is to type them several times (repeat, repeat, repeat).
   But you don't want to log out and sign in again and again, you also don't want to lock your pc and risk to be logged out forever.
   This script offers you the possibility to practice your password multiple times.
-  The password is stored as a hash, salt should be added.
+  The password is hashed (SHA512) with a salt and stored in a file.
   I am not sure how secure this script is in respect of internal memory.
   

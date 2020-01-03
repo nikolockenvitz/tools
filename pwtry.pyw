@@ -2,10 +2,16 @@
 This script should help to remember an important password
 by trying it several times (without logging out from a
 service each time).
+
+Press Enter after typing a password to check/verify whether
+it is correct.
+Do a right-click after typing a password to set it and/or
+overwrite an existing one.
 """
 
 from tkinter import *
 import hashlib
+import random
 
 FILENAME = "pwtry.txt"
 
@@ -20,13 +26,20 @@ class PasswordTry:
         self.createWindow()
 
     def readPasswordHashFromFile(self):
-        f = open(FILENAME)
-        self.pwHash = f.read()
-        f.close()
+        try:
+            f = open(FILENAME)
+            content = f.read().splitlines()
+            f.close()
+            self.salt = content[0]
+            self.pwHash = content[1]
+        except:
+            self.salt = ""
+            self.pwHash = ""
+            print("Couldn't read password from file. Please set one first.")
 
     def writePasswordHashToFile(self):
         f = open(FILENAME, "w")
-        f.write(self.pwHash)
+        f.write(self.salt + "\n" + self.pwHash)
         f.close()
 
     def createWindow(self):
@@ -45,7 +58,7 @@ class PasswordTry:
 
     def validateInput(self, event=None):
         pw = self.getAndClearInput()
-        if(hashSHA512(pw) == self.pwHash):
+        if(self.getHash(pw) == self.pwHash):
             self.root.config(bg="lightgreen")
         else:
             self.root.config(bg="red")
@@ -53,7 +66,8 @@ class PasswordTry:
 
     def setInputAsNewPassword(self, event=None):
         pw = self.getAndClearInput()
-        self.pwHash = hashSHA512(pw)
+        self.salt = self.getRandomSalt()
+        self.pwHash = self.getHash(pw)
         self.writePasswordHashToFile()
         self.root.config(bg="SystemButtonFace")
         self.e1.focus()
@@ -62,6 +76,12 @@ class PasswordTry:
         result = self.e1.get()
         self.e1.delete(0, END)
         return result
+
+    def getHash(self, password):
+        return hashSHA512(password + self.salt)
+
+    def getRandomSalt(self, length=20):
+        return ''.join(chr(random.randint(32,126)) for i in range(length))
 
 if __name__ == "__main__":
     p = PasswordTry()
