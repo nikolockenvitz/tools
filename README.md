@@ -10,6 +10,12 @@ Currently this repository includes following files and folders:
   The script is optimized to start multiple processes so that it is hard to kill them with task manager.
   There is also a script to kill all processes, but you may have to run it several times to get all processes.
 
+- decisionmatrix
+
+  Webpage to create decision matrices.
+  It's available on https://nikolockenvitz.de/decisionmatrix but you can also run it locally or host it yourself.
+  It's still in progress.
+
 - rcj-current-delay
 
   For the RoboCup Junior Rescue competition I wanted to show the participants how long the current delay is at each competition field.

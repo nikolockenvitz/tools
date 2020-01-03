@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Decision Matrix</title>
+		<style>
+			body {
+				background: #333;
+				color: #ccc;
+				caret-color: #ccc;
+				height: 100%;
+				margin: 0;
+				padding: 10px;
+				font-family: "Courier New", Courier, monospace;
+			}
+			table {
+				border-collapse: collapse;
+				min-width: 100%;
+			}
+			tr {
+				border-top: 1px solid #ccc;
+			}
+			tr:first-child {
+				border-top: none;
+			}
+			td {
+				padding: 10px;
+				border-left: 1px solid #ccc
+			}
+			td:first-child {
+				border-left: none;
+			}
+			tr td p {
+				display: inline;
+				/*background-color: #00f;*/
+				margin: 0;
+			}
+			p:focus {
+				outline: none;
+			}
+			.draggable {
+				cursor: grab;
+			}
+			.draggable::before {
+				content: "☰ ";
+			}
+			.draggable * {
+				cursor: text;
+			}
+		</style>
+	</head>
+<!--
+	TODOs:
+	 - drag'n'drop
+	 - add rows and columns
+	 - delete rows and columns
+	 - auto-save and export
+-->
+	<body>
+		<table id="table">
+			<tr>
+				<td></td>
+				<td>Weight</td>
+				<td><p contenteditable="true">Alternative 1</p></td>
+				<td><p contenteditable="true">Alternative 2</p></td>
+			</tr>
+			<tr>
+				<td><p contenteditable="true">Criteria 1</p></td>
+				<td><p contenteditable="true">5</p></td>
+				<td><p contenteditable="true">1</p></td>
+				<td><p contenteditable="true">2</p></td>
+			</tr>
+			<tr>
+				<td><p contenteditable="true">Criteria 2</p></td>
+				<td><p contenteditable="true">6</p></td>
+				<td><p contenteditable="true">3</p></td>
+				<td><p contenteditable="true">4</p></td>
+			</tr>
+			<tr>
+				<td>Score</td>
+				<td></td>
+				<td></td>
+				<td></td>
+			</tr>
+		</table>
+
+		<script type="text/javascript">
+			let temporarilyDragDisabledCells = [];
+			let dataTransferDrag = "";
+
+			window.onload = function() {
+				let table = document.getElementById("table");
+				let rows = table.rows;
+				
+				let enableDragAndDropForCell = function (cell) {
+					cell.draggable = true;
+					for (let child of cell.children) {
+						child.draggable = false;
+						child.addEventListener('mousedown', function(e) {
+							e.stopPropagation();
+							disableDragForCellTemporarily(child.parentNode);
+						});
+					}
+					cell.ondragstart = drag;
+					cell.ondragover = checkWhetherDropAllowed;
+					cell.ondrop = drop;
+					cell.classList.add("draggable");
+				}
+				// columns (except first and second)
+				for (let i=2; i<rows[0].cells.length; i++) {
+					enableDragAndDropForCell(rows[0].cells[i]);
+				}
+				// rows (except first and last)
+				for (let i=1; i<rows.length-1; i++) {
+					enableDragAndDropForCell(rows[i].cells[0]);
+				}
+
+				// disable drop for all contenteditable-fields
+				let elements = document.querySelectorAll('[contenteditable="true"]');
+				for (let element of elements) {
+					element.addEventListener("drop", function (e) {
+						e.preventDefault();
+						return false;
+					});
+					element.parentNode.addEventListener("drop", function (e) {
+						e.preventDefault();
+						return false;
+					});
+				}
+
+				window.addEventListener('mouseup', function(e) {
+					// drag needs to be disabled when user clicks in childs of cell
+					// -> enable drag again when mouse is released
+					for (let el of temporarilyDragDisabledCells) {
+						el.draggable = true;
+					}
+					temporarilyDragDisabledCells = [];
+
+					// if user clicks next to "input" then get focus
+					if (e.target.tagName === "TD") {
+						for (let child of e.target.children) {
+							if (child.tagName === "P" &&
+								child.getAttribute("contenteditable") === "true") {
+								child.focus();
+								break;
+							}
+						}
+					}
+				});
+
+				// update score-row if values change
+				document.addEventListener("input", function (e) {
+					let cell = e.target.parentNode;
+					let { rowIndex, cellIndex } = getRowAndCellIndexOfCell(cell);
+					if (rowIndex >= 1 && cellIndex >= 1) {
+						updateScores();
+					}
+				});
+
+				updateScores();
+			};
+
+			let updateScores = function () {
+				let table = document.getElementById("table");
+				let rows = table.rows;
+				for (let c=2; c<rows[0].cells.length; c++) {
+					let score = 0;
+					for (let r=1; r<rows.length-1; r++) {
+						let grade = +rows[r].cells[c].children[0].innerText.trim();
+						let weight = +rows[r].cells[1].children[0].innerText.trim();
+						score += grade * weight;
+					}
+					rows[rows.length-1].cells[c].innerText = score;
+				}
+			};
+
+			let disableDragForCellTemporarily = function (cell) {
+				temporarilyDragDisabledCells.push(cell);
+				cell.draggable = false;
+			};
+			let getDataForDrag = function (e) {
+				let data = e.dataTransfer.getData("text");
+				if (data === "") {
+					if (dataTransferDrag === "") {
+						// unknown error
+					} else {
+						// e.dataTransfer is not working in Chrome
+						data = dataTransferDrag;
+						//alert("Please use Firefox!");
+					}
+				}
+				return data;
+			};
+
+			let drag = function (e) {
+				let id = getCellId(e.srcElement);
+				e.dataTransfer.setData("text", id);
+				dataTransferDrag = id;
+			};
+
+			let checkWhetherDropAllowed = function (e) {
+				let data = getDataForDrag(e);
+				let from = getRowAndCellIndexOfCellId(data);
+				let to = getRowAndCellIndexOfCell(e.srcElement);
+
+				if (isDroppable(from, to)) {
+					e.preventDefault();
+				}
+			};
+
+			let isDroppable = function (from, to) {
+				// mustn't be same cell but at least row- or cell-index have to be 0
+				if ( !(from.rowIndex === to.rowIndex &&
+						from.cellIndex === to.cellIndex) &&
+					( (from.rowIndex === 0 && to.rowIndex === 0) ||
+					(from.cellIndex === 0 && to.cellIndex === 0) ) ) {
+					
+					return true;
+				}
+				return false;
+			}
+
+			let drop = function (e) {
+				e.preventDefault();
+				let data = getDataForDrag(e);
+				let from = getRowAndCellIndexOfCellId(data);
+				let to = getRowAndCellIndexOfCell(e.srcElement);
+				
+				if (!isDroppable(from, to)) {
+					return false;
+				}
+				console.log(from, to);
+				// TODO
+				// move "from"-row/-column next to "to"-row/-column
+				// if from smaller than to -> insert on the right / below
+				// if from greater than to -> insert on the left / above
+				dataTransferDrag = "";
+
+			};
+
+			let getCellId = function (cell) {
+				let { rowIndex, cellIndex } = getRowAndCellIndexOfCell(cell);
+				return "cell-" + rowIndex + "-" + cellIndex;
+			}
+			let getRowAndCellIndexOfCell = function (cell) {
+				while (cell.cellIndex === undefined) {
+					// function was probably called with child of cell
+					cell = cell.parentNode;
+				}
+				return { rowIndex: cell.parentNode.rowIndex,
+						 cellIndex: cell.cellIndex };
+			};
+			let getRowAndCellIndexOfCellId = function (cellId) {
+				let temp = cellId.split("-");
+				return { rowIndex: +temp[1],
+						 cellIndex: +temp[2] };
+			}
+		</script>
+	</body>
+</html>
