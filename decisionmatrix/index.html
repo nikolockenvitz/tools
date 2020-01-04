@@ -32,10 +32,14 @@
 				border-left: none;
 			}
 			tr td p {
-				display: inline;
+				display: inline-block;
 				/*background-color: #00f;*/
 				margin: 0;
 			}
+			/*p:not([draggable='false'])::first-letter {
+				/* draggable is explicitly set to false for childs of draggable table cells *
+				background-color: #00f;
+			}*/
 			p:focus {
 				outline: none;
 			}
@@ -58,7 +62,7 @@
 	 - auto-save and export
 -->
 	<body>
-		<table id="table">
+		<table id="table" spellcheck="false">
 			<tr>
 				<td></td>
 				<td>Weight</td>
@@ -153,6 +157,24 @@
 				document.addEventListener("input", function (e) {
 					let cell = e.target.parentNode;
 					let { rowIndex, cellIndex } = getRowAndCellIndexOfCell(cell);
+
+					// split into grade and comment
+					/*let pElement = document.getElementById("table").rows[rowIndex].cells[cellIndex].children[0];
+					let text = pElement.innerText;
+					//console.log(window.getSelection());
+					let x = "<span class='number'>";
+					let i = 0;
+					while (true) {
+						if (isNaN(text[i]) || i >= text.length) {
+							break;
+						}
+						x += text[i++];
+					}
+					x += "</span>";
+					x += "<span class='comment'>" + text.substring(i) + "</span>";
+					pElement.innerHTML = x;*/
+
+					// update last row of table (score)
 					if (rowIndex >= 1 && cellIndex >= 1) {
 						updateScores();
 					}
@@ -167,8 +189,8 @@
 				for (let c=2; c<rows[0].cells.length; c++) {
 					let score = 0;
 					for (let r=1; r<rows.length-1; r++) {
-						let grade = +rows[r].cells[c].children[0].innerText.trim();
-						let weight = +rows[r].cells[1].children[0].innerText.trim();
+						let grade = +rows[r].cells[c].children[0].innerText.split(/\s/,1)[0]; // read number only until first whitespace
+						let weight = +rows[r].cells[1].children[0].innerText.split(/\s/,1)[0];
 						score += grade * weight;
 					}
 					rows[rows.length-1].cells[c].innerText = score;
