@@ -36,10 +36,10 @@
 				/*background-color: #00f;*/
 				margin: 0;
 			}
-			/*p:not([draggable='false'])::first-letter {
-				/* draggable is explicitly set to false for childs of draggable table cells *
-				background-color: #00f;
-			}*/
+			p[draggable='false'] {
+				/* draggable is explicitly set to false for childs of draggable table cells (first row/column) */
+				margin-top: 3px;
+			}
 			p:focus {
 				outline: none;
 			}
@@ -48,20 +48,42 @@
 			}
 			.draggable::before {
 				content: "☰ ";
+				vertical-align: top;
 			}
 			.draggable * {
 				cursor: text;
+			}
+			#buttons {
+				margin-bottom: 10px;
+			}
+			#buttons button {
+				background-color: #66ad57;
+				border: none;
+				color: #fff;
+				text-align: center;
+				padding: 0.5em 1em;
+				margin: 0 1px;
+			}
+			#buttons button:hover {
+				background-color: #76bd67;
+			}
+			#buttons button#btn-delete {
+				background-color: #f0142f;
 			}
 		</style>
 	</head>
 <!--
 	TODOs:
-	 - drag'n'drop
-	 - add rows and columns
-	 - delete rows and columns
+	 - drag'n'drop: move columns and rows
 	 - auto-save and export
 -->
 	<body>
+		<div id="buttons">
+			<button onclick="addRow()">Add Criteria (Row)</button>
+			<button onclick="addColumn()">Add Alternative (Column)</button>
+			<button id="btn-delete">Delete</button>
+		</div>
+
 		<table id="table" spellcheck="false">
 			<tr>
 				<td></td>
@@ -93,45 +115,36 @@
 			let temporarilyDragDisabledCells = [];
 			let dataTransferDrag = "";
 
+			let showElement = function (el) { el.style.display = ""; };
+			let hideElement = function (el) { el.style.display = "none"; };
+
 			window.onload = function() {
 				let table = document.getElementById("table");
 				let rows = table.rows;
-				
-				let enableDragAndDropForCell = function (cell) {
-					cell.draggable = true;
-					for (let child of cell.children) {
-						child.draggable = false;
-						child.addEventListener('mousedown', function(e) {
-							e.stopPropagation();
-							disableDragForCellTemporarily(child.parentNode);
-						});
-					}
-					cell.ondragstart = drag;
-					cell.ondragover = checkWhetherDropAllowed;
-					cell.ondrop = drop;
-					cell.classList.add("draggable");
-				}
-				// columns (except first and second)
+
+				// make columns draggable (except first and second)
 				for (let i=2; i<rows[0].cells.length; i++) {
 					enableDragAndDropForCell(rows[0].cells[i]);
 				}
-				// rows (except first and last)
+				// make rows draggable (except first and last)
 				for (let i=1; i<rows.length-1; i++) {
 					enableDragAndDropForCell(rows[i].cells[0]);
 				}
 
 				// disable drop for all contenteditable-fields
 				let elements = document.querySelectorAll('[contenteditable="true"]');
-				for (let element of elements) {
-					element.addEventListener("drop", function (e) {
-						e.preventDefault();
-						return false;
-					});
-					element.parentNode.addEventListener("drop", function (e) {
-						e.preventDefault();
-						return false;
-					});
-				}
+				disableDropForElements(elements);
+
+				// delete widget
+				let el = document.getElementById("btn-delete");
+				enableDropForDeleteWidget(el);
+				document.addEventListener("dragstart", function (e) {
+					showElement(el);
+				});
+				document.addEventListener("dragend", function (e) {
+					hideElement(el);
+				});
+				hideElement(el);
 
 				window.addEventListener('mouseup', function(e) {
 					// drag needs to be disabled when user clicks in childs of cell
@@ -181,6 +194,55 @@
 				});
 
 				updateScores();
+			};
+
+			let enableDragAndDropForCell = function (cell) {
+				cell.draggable = true;
+				for (let child of cell.children) {
+					child.draggable = false;
+					child.addEventListener('mousedown', function(e) {
+						e.stopPropagation();
+						disableDragForCellTemporarily(child.parentNode);
+					});
+				}
+				cell.ondragstart = drag;
+				cell.ondragover = checkWhetherDropAllowed;
+				cell.ondrop = drop;
+				cell.classList.add("draggable");
+			};
+
+			let disableDropForElements = function (elements) {
+				for (let element of elements) {
+					element.addEventListener("drop", function (e) {
+						e.preventDefault();
+						return false;
+					});
+					element.parentNode.addEventListener("drop", function (e) {
+						e.preventDefault();
+						return false;
+					});
+				}
+			};
+
+			let enableDropForDeleteWidget = function (el) {
+				el.ondragover = function (e) { e.preventDefault(); };
+				el.ondrop = function (e) {
+					e.preventDefault();
+					let data = getDataForDrag(e);
+					let { rowIndex, cellIndex } = getRowAndCellIndexOfCellId(data);
+					if (rowIndex === 0) {
+						// delete column
+						for (let row of document.getElementById("table").rows) {
+							row.deleteCell(cellIndex);
+						}
+						hideElement(el);
+					} else if (cellIndex === 0) {
+						// delete row
+						document.getElementById("table").deleteRow(rowIndex);
+						updateScores();
+						hideElement(el);
+					}
+				}
 			};
 
 			let updateScores = function () {
@@ -278,6 +340,41 @@
 				return { rowIndex: +temp[1],
 						 cellIndex: +temp[2] };
 			}
+
+			let cellTemplate = '<td><p contenteditable="true">{content}</p></td>';
+
+			let addRow = function () {
+				let table = document.getElementById("table");
+				let newRow = table.insertRow(table.rows.length-1);
+
+				newRow.insertCell(-1).innerHTML = cellTemplate.replace("{content}", "Criteria");
+				for (let i=1; i<table.rows[0].cells.length; i++) {
+					newRow.insertCell(-1).innerHTML = cellTemplate.replace("{content}", "0");
+				}
+
+				enableDragAndDropForCell(newRow.cells[0]);
+
+				let elements = newRow.querySelectorAll('[contenteditable="true"]');
+				disableDropForElements(elements);
+			};
+
+			let addColumn = function () {
+				let rows = document.getElementById("table").rows;
+				let addedCells = [];
+
+				let cell;
+				for (let i=0; i<rows.length; i++) {
+					cell = rows[i].insertCell(-1);
+					cell.innerHTML = cellTemplate.replace("{content}", i===0 ? "Alternative" : "0");
+					addedCells.push(cell);
+				}
+
+				enableDragAndDropForCell(rows[0].cells[rows[0].cells.length-1]);
+
+				for (let addedCell of addedCells) {
+					disableDropForElements(addedCell.querySelectorAll('[contenteditable="true"]'));
+				}
+			};
 		</script>
 	</body>
 </html>
