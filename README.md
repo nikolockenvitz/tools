@@ -53,4 +53,7 @@ Currently this repository includes following files and folders:
   This script offers you the possibility to practice your password multiple times.
   The password is hashed (SHA512) with a salt and stored in a file.
   I am not sure how secure this script is in respect of internal memory.
-  
+
+- toggleTouchscreen.ps1
+
+  This powershell script toggles the status of the touchscreen (enabling/disabling it).
