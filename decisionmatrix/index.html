@@ -74,7 +74,6 @@
 	</head>
 <!--
 	TODOs:
-	 - drag'n'drop: move columns and rows
 	 - auto-save and export
 -->
 	<body>
@@ -231,18 +230,23 @@
 					let data = getDataForDrag(e);
 					let { rowIndex, cellIndex } = getRowAndCellIndexOfCellId(data);
 					if (rowIndex === 0) {
-						// delete column
-						for (let row of document.getElementById("table").rows) {
-							row.deleteCell(cellIndex);
-						}
-						hideElement(el);
+						deleteColumn(cellIndex);
 					} else if (cellIndex === 0) {
-						// delete row
-						document.getElementById("table").deleteRow(rowIndex);
+						deleteRow(rowIndex);
 						updateScores();
-						hideElement(el);
 					}
+					hideElement(el);
 				}
+			};
+
+			let deleteColumn = function (columnIndex) {
+				for (let row of document.getElementById("table").rows) {
+					row.deleteCell(columnIndex);
+				}
+			};
+
+			let deleteRow = function (rowIndex) {
+				document.getElementById("table").deleteRow(rowIndex);
 			};
 
 			let updateScores = function () {
@@ -310,15 +314,28 @@
 				let data = getDataForDrag(e);
 				let from = getRowAndCellIndexOfCellId(data);
 				let to = getRowAndCellIndexOfCell(e.srcElement);
-				
+
 				if (!isDroppable(from, to)) {
 					return false;
 				}
-				console.log(from, to);
-				// TODO
-				// move "from"-row/-column next to "to"-row/-column
-				// if from smaller than to -> insert on the right / below
-				// if from greater than to -> insert on the left / above
+
+				if (from.rowIndex === 0 && to.rowIndex === 0) {
+					// move column
+					let content = [];
+					for (let row of document.getElementById("table").rows) {
+						content.push(row.cells[from.cellIndex].innerText);
+					}
+					deleteColumn(from.cellIndex);
+					addColumn(to.cellIndex, content);
+				} else if (from.cellIndex === 0 && to.cellIndex === 0) {
+					// move row
+					let content = [];
+					for (let cell of document.getElementById("table").rows[from.rowIndex].cells) {
+						content.push(cell.innerText);
+					}
+					deleteRow(from.rowIndex);
+					addRow(to.rowIndex, content);
+				}
 				dataTransferDrag = "";
 
 			};
@@ -343,13 +360,20 @@
 
 			let cellTemplate = '<td><p contenteditable="true">{content}</p></td>';
 
-			let addRow = function () {
+			let addRow = function (rowIndex, content) {
 				let table = document.getElementById("table");
-				let newRow = table.insertRow(table.rows.length-1);
 
-				newRow.insertCell(-1).innerHTML = cellTemplate.replace("{content}", "Criteria");
-				for (let i=1; i<table.rows[0].cells.length; i++) {
-					newRow.insertCell(-1).innerHTML = cellTemplate.replace("{content}", "0");
+				if (rowIndex === undefined) {
+					rowIndex = table.rows.length-1;
+				}
+				if (content === undefined) {
+					content = ["Criteria"];
+				}
+
+				let newRow = table.insertRow(rowIndex);
+
+				for (let i=0; i<table.rows[0].cells.length; i++) {
+					newRow.insertCell(-1).innerHTML = cellTemplate.replace("{content}", content.length > i ? content[i] : "0");
 				}
 
 				enableDragAndDropForCell(newRow.cells[0]);
@@ -358,18 +382,25 @@
 				disableDropForElements(elements);
 			};
 
-			let addColumn = function () {
+			let addColumn = function (columnIndex, content) {
 				let rows = document.getElementById("table").rows;
 				let addedCells = [];
 
+				if (columnIndex === undefined) {
+					columnIndex = rows[0].cells.length;
+				}
+				if (content === undefined) {
+					content = ["Alternative"];
+				}
+
 				let cell;
 				for (let i=0; i<rows.length; i++) {
-					cell = rows[i].insertCell(-1);
-					cell.innerHTML = cellTemplate.replace("{content}", i===0 ? "Alternative" : "0");
+					cell = rows[i].insertCell(columnIndex);
+					cell.innerHTML = cellTemplate.replace("{content}", content.length > i ? content[i] : "0");
 					addedCells.push(cell);
 				}
 
-				enableDragAndDropForCell(rows[0].cells[rows[0].cells.length-1]);
+				enableDragAndDropForCell(rows[0].cells[columnIndex]);
 
 				for (let addedCell of addedCells) {
 					disableDropForElements(addedCell.querySelectorAll('[contenteditable="true"]'));
