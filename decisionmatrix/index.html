@@ -57,69 +57,79 @@
 				margin-bottom: 10px;
 			}
 			#buttons button {
-				background-color: #66ad57;
 				border: none;
 				color: #fff;
 				text-align: center;
 				padding: 0.5em 1em;
 				margin: 0 1px;
 			}
-			#buttons button:hover {
+			.btn-green {
+				background-color: #66ad57;
+			}
+			.btn-green:hover {
 				background-color: #76bd67;
 			}
-			#buttons button#btn-delete {
+			.btn-red {
 				background-color: #f0142f;
+			}
+			.btn-red:hover {
+				background-color: #ff243f;
+			}
+			.btn-blue {
+				background-color: #05adff;
+			}
+			.btn-blue:hover {
+				background-color: #15bdff;
 			}
 		</style>
 	</head>
-<!--
-	TODOs:
-	 - auto-save and export
--->
+
 	<body>
 		<div id="buttons">
-			<button onclick="addRow()">Add Criteria (Row)</button>
-			<button onclick="addColumn()">Add Alternative (Column)</button>
-			<button id="btn-delete">Delete</button>
+			<button class="btn-blue" onclick="downloadCSV()">Download CSV</button>
+			<button class="btn-red" onclick="resetTable()">Reset Matrix</button>
+			<button class="btn-green" onclick="addRow()">Add Criteria (Row)</button>
+			<button class="btn-green" onclick="addColumn()">Add Alternative (Column)</button>
+			<button class="btn-red" id="btn-delete">Delete</button>
 		</div>
 
 		<table id="table" spellcheck="false">
-			<tr>
-				<td></td>
-				<td>Weight</td>
-				<td><p contenteditable="true">Alternative 1</p></td>
-				<td><p contenteditable="true">Alternative 2</p></td>
-			</tr>
-			<tr>
-				<td><p contenteditable="true">Criteria 1</p></td>
-				<td><p contenteditable="true">5</p></td>
-				<td><p contenteditable="true">1</p></td>
-				<td><p contenteditable="true">2</p></td>
-			</tr>
-			<tr>
-				<td><p contenteditable="true">Criteria 2</p></td>
-				<td><p contenteditable="true">6</p></td>
-				<td><p contenteditable="true">3</p></td>
-				<td><p contenteditable="true">4</p></td>
-			</tr>
-			<tr>
-				<td>Score</td>
-				<td></td>
-				<td></td>
-				<td></td>
-			</tr>
+			<!-- table content will be filled in -->
 		</table>
 
 		<script type="text/javascript">
+			const LS_DATA = "data";
 			let temporarilyDragDisabledCells = [];
 			let dataTransferDrag = "";
 
 			let showElement = function (el) { el.style.display = ""; };
 			let hideElement = function (el) { el.style.display = "none"; };
 
+			const defaultContent = [
+				["","Weight","Alternative 1","Alternative 2"],
+				["Criteria 1", "5", "1", "2"],
+				["Criteria 2", "6", "3", "4"],
+				["Score", "", "", ""]];
+
+			const cellTemplate = '<td><p contenteditable="true">{content}</p></td>';
+			const cellTemplateNotEditable = '<td>{content}</td>';
+
 			window.onload = function() {
+				init();
+			};
+
+			let init = function () {
 				let table = document.getElementById("table");
 				let rows = table.rows;
+
+				// create table
+				let data = localStorage.getItem(LS_DATA);
+				if (data === null || data === undefined || data === "[]") {
+					data = defaultContent;
+				} else {
+					data = JSON.parse(data);
+				}
+				setTableContent(data);
 
 				// make columns draggable (except first and second)
 				for (let i=2; i<rows[0].cells.length; i++) {
@@ -165,8 +175,10 @@
 					}
 				});
 
-				// update score-row if values change
+				// save changes to local storage and update score-row if values change
 				document.addEventListener("input", function (e) {
+					saveTableToLocalStorage();
+
 					let cell = e.target.parentNode;
 					let { rowIndex, cellIndex } = getRowAndCellIndexOfCell(cell);
 
@@ -193,6 +205,10 @@
 				});
 
 				updateScores();
+			};
+
+			let saveTableToLocalStorage = function () {
+				localStorage.setItem(LS_DATA, JSON.stringify(getTableContent()));
 			};
 
 			let enableDragAndDropForCell = function (cell) {
@@ -243,10 +259,12 @@
 				for (let row of document.getElementById("table").rows) {
 					row.deleteCell(columnIndex);
 				}
+				saveTableToLocalStorage();
 			};
 
 			let deleteRow = function (rowIndex) {
 				document.getElementById("table").deleteRow(rowIndex);
+				saveTableToLocalStorage();
 			};
 
 			let updateScores = function () {
@@ -337,7 +355,6 @@
 					addRow(to.rowIndex, content);
 				}
 				dataTransferDrag = "";
-
 			};
 
 			let getCellId = function (cell) {
@@ -357,8 +374,6 @@
 				return { rowIndex: +temp[1],
 						 cellIndex: +temp[2] };
 			}
-
-			let cellTemplate = '<td><p contenteditable="true">{content}</p></td>';
 
 			let addRow = function (rowIndex, content) {
 				let table = document.getElementById("table");
@@ -380,6 +395,8 @@
 
 				let elements = newRow.querySelectorAll('[contenteditable="true"]');
 				disableDropForElements(elements);
+
+				saveTableToLocalStorage();
 			};
 
 			let addColumn = function (columnIndex, content) {
@@ -405,6 +422,67 @@
 				for (let addedCell of addedCells) {
 					disableDropForElements(addedCell.querySelectorAll('[contenteditable="true"]'));
 				}
+
+				saveTableToLocalStorage();
+			};
+
+			let setTableContent = function (content) {
+				let table = document.getElementById("table");
+				for (let i=table.rows.length-1; i>=0; i--) {
+					deleteRow(i);
+				}
+
+				let templ;
+				for (let i=0; i<content.length; i++) {
+					let newRow = table.insertRow(-1);
+					for (let j=0; j<content[i].length; j++) {
+						if (i === content.length-1 || (i === 0 && (j === 0 || j === 1))) {
+							templ = cellTemplateNotEditable;
+						} else {
+							templ = cellTemplate;
+						}
+						newRow.insertCell(-1).innerHTML = templ.replace("{content}", content[i][j]);
+					}
+				}
+
+				saveTableToLocalStorage();
+			};
+
+			let getTableContent = function () {
+				let table = document.getElementById("table");
+				let content = [];
+				for (let i=0; i<table.rows.length; i++) {
+					content.push([]);
+					for (let j=0; j<table.rows[i].cells.length; j++) {
+						content[i].push(table.rows[i].cells[j].innerText);
+					}
+				}
+				return content;
+			};
+
+			let downloadCSV = function () {
+				let content = getTableContent();
+
+				// create csv
+				let csv = "";
+				for (let row of content) {
+					for (let i=0; i<row.length; i++) {
+						csv += (i === 0 ? "" : ",") + "\"" + row[i].replace(/\"/g, "\"\"") + "\"";
+					}
+					csv += "\n";
+				}
+
+				// download csv
+				let hiddenElement = document.createElement('a');
+				hiddenElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
+				hiddenElement.target = '_blank';
+				hiddenElement.download = 'decisionmatrix.csv';
+				hiddenElement.click();
+			};
+
+			let resetTable = function () {
+				localStorage.removeItem(LS_DATA);
+				init();
 			};
 		</script>
 	</body>

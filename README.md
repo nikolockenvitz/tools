@@ -14,7 +14,8 @@ Currently this repository includes following files and folders:
 
   Webpage to create decision matrices.
   It's available on https://nikolockenvitz.de/decisionmatrix but you can also run it locally or host it yourself.
-  It's still in progress.
+  You can change, add and delete alternatives and criterias and also move them with drag'n'drop.
+  The matrix is auto-saved in local storage, but you can also download it as CSV.
 
 - rcj-current-delay
 
