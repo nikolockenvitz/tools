@@ -1,0 +1,75 @@
+body {
+    background: #333;
+    color: #ccc;
+    caret-color: #ccc;
+    height: 100%;
+    margin: 0;
+    padding: 10px;
+    font-family: "Courier New", Courier, monospace;
+}
+table {
+    border-collapse: collapse;
+    min-width: 100%;
+}
+tr {
+    border-top: 1px solid #ccc;
+}
+tr:first-child {
+    border-top: none;
+}
+td {
+    padding: 10px;
+    border-left: 1px solid #ccc
+}
+td:first-child {
+    border-left: none;
+}
+tr td p {
+    display: inline-block;
+    margin: 0;
+}
+p[draggable='false'] {
+    /* draggable is explicitly set to false for childs of draggable table cells (first row/column) */
+    margin-top: 3px;
+}
+p:focus {
+    outline: none;
+}
+.draggable {
+    cursor: grab;
+}
+.draggable::before {
+    content: "☰ ";
+    vertical-align: top;
+}
+.draggable * {
+    cursor: text;
+}
+#buttons {
+    margin-bottom: 10px;
+}
+#buttons button {
+    border: none;
+    color: #fff;
+    text-align: center;
+    padding: 0.5em 1em;
+    margin: 0 1px;
+}
+.btn-green {
+    background-color: #66ad57;
+}
+.btn-green:hover {
+    background-color: #76bd67;
+}
+.btn-red {
+    background-color: #f0142f;
+}
+.btn-red:hover {
+    background-color: #ff243f;
+}
+.btn-blue {
+    background-color: #05adff;
+}
+.btn-blue:hover {
+    background-color: #15bdff;
+}
