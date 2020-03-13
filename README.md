@@ -32,13 +32,6 @@ Currently this repository includes following files and folders:
   This script helps that nothing else is done on your pc while you are away.
   This is done by locking your pc automatically when the focus moves to another program (e.g. someone opens your file explorer).
 
-- powerBrightness.pyw
-
-  Windows 10 seems to store two different brightness levels: one for charging and one for on-battery.
-  This can lead to annoying situations when Windows thinks it is smart and changes your brightness level automatically (when plugging in/out).
-  This script should take care that this behauvior is "overwritten" and the brightness level stays the same (or at least doesn't change the wrong way).
-  It's not yet working perfectly, still in progress.
-
 - pse.py
 
   Did you ever tried to write your name or a word with chemical element symbols?
@@ -58,3 +51,4 @@ Currently this repository includes following files and folders:
 - toggleTouchscreen.ps1
 
   This powershell script toggles the status of the touchscreen (enabling/disabling it).
+  Find setup instructions in the file.
