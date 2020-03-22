@@ -16,13 +16,6 @@ Currently this repository includes following files and folders:
   Availble on https://nikolockenvitz.de/counter.
   Can be controlled by the buttons or by keyboard (-/+ and arrows).
 
-- decisionmatrix
-
-  Webpage to create decision matrices.
-  It's available on https://nikolockenvitz.de/decisionmatrix but you can also run it locally or host it yourself.
-  You can change, add and delete alternatives and criterias and also move them with drag'n'drop.
-  The matrix is auto-saved in local storage, but you can also download it as CSV.
-
 - matrix
 
   Matrix like animation based on https://github.com/parambirs/matrix.
