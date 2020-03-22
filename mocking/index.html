@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	</head>
+	
+	<body style="background: #333;">
+		<textarea id="input" style='background: #666; color: #fff; width: 94vw; height: 7em; font-family: "Courier New", Courier, monospace; resize: none; overflow: hidden; border: none; padding: 1vw; border-radius: 2vw; display: block; margin-left: auto; margin-right: auto; margin-top: 5vh; outline: none;'></textarea>
+		<p id="output" style='color: #ccc; font-family: Impact, Charcoal, sans-serif; font-size: 2em; text-align: center; word-wrap: break-word;'></p>
+	</body>
+	
+	<script>		
+		let createMemeText = function () {
+			let input = document.getElementById("input").value;
+			let string1 = "", string2 = "", b = true, d = 0, r;
+			input = input.toLowerCase().replace("ß","ss").replace("ä","ae").replace("ö","oe").replace("ü","ue");
+			for (let i=0; i<input.length; i++) {
+				if ("abcdefghijklmnopqrstuvwxyz".includes(input[i])) {
+					string1 += b ? input[i] : input[i].toUpperCase();
+					string2 += b ? input[i].toUpperCase() : input[i];
+					if (input[i] === "i") { d += b ? 1 : -1; }
+					if (input[i] === "l") { d += b ? -1 : 1; }
+					b = !b;
+				} else {
+					string1 += input[i];
+					string2 += input[i];
+				}
+			}
+			if (d >= 0) {
+				r = string1;
+			} else {
+				r = string2;
+			}
+			
+			if (document.getElementById("output").innerHTML !== r) {
+				document.getElementById("output").innerHTML = r;
+			}
+		};
+		
+		setInterval(createMemeText, 100);
+	</script>
+</html>

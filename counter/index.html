@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Counter</title>
+		<style>
+			button {
+				background-color: #66ad57;
+				border: none;
+				color: #fff;
+				width: 48%;
+				max-width: 50vh;
+				height: 10vh;
+				text-align: center;
+				margin: 5vh 1px;
+				font-size: 2em;
+			}
+			button:hover {
+				background-color: #76bd67;
+			}
+			#btn-div {
+				position: absolute;
+				bottom: 0;
+				width: 100%;
+			}
+		</style>
+	</head>
+
+	<body style='background: #333; color: #ccc; height: 100%; margin: 0; text-align:center; vertical-align: center; font-family: "Courier New", Courier, monospace;'>
+		<p id="counter" style="margin: 0; display: inline-block;">0</p>
+		<div id="btn-div"><button onclick="add(-1)">-</button><button onclick="add(1)">+</button></div>
+		
+		<script>
+		let add = function (n) {
+			p = Math.max(0, p+n);
+			updateUI();
+			updateURL();
+		};
+		
+		let fontsize = 50;
+		let updateUI = function () {
+			let el = document.getElementById("counter");
+			let btndiv = document.getElementById("btn-div");
+			el.innerHTML = p;
+			el.style.marginTop = 0;
+			while (el.clientWidth < window.innerWidth &&
+					document.body.clientHeight < window.innerHeight) {
+				el.style.fontSize = ++fontsize + "px";
+			}
+			while (el.clientWidth >= window.innerWidth ||
+					document.body.clientHeight >= window.innerHeight ||
+					el.clientHeight + btndiv.clientHeight >= window.innerHeight) {
+				el.style.fontSize = --fontsize + "px";
+			}
+			el.style.marginTop = (window.innerHeight - btndiv.clientHeight - el.clientHeight)/2 + "px";
+		};
+		let updateURL = function () {
+			window.history.pushState( {} , '', '?v='+p );
+		};
+		
+		let p = 0;
+		
+		let url = new URL(window.location.href);
+		let urlparam = url.searchParams.get("v");
+		if (urlparam) { p = parseInt(urlparam); }
+		if (isNaN(p)) { p = 0; }
+		updateUI();
+		updateURL();
+		
+		
+		document.addEventListener('keydown', function(event) {
+			if (event.key === "+" || event.key === "ArrowUp" || event.key === "ArrowRight" || event.key === " ") {
+				add(1);
+			} else if (event.key === "-" || event.key === "ArrowDown" || event.key === "ArrowLeft") {
+				add(-1);
+			} else {
+				console.log(event);
+			}
+		});
+		</script>
+	</body>
+</html>

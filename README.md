@@ -10,12 +10,30 @@ Currently this repository includes following files and folders:
   The script is optimized to start multiple processes so that it is hard to kill them with task manager.
   There is also a script to kill all processes, but you may have to run it several times to get all processes.
 
+- counter
+
+  This is a simple counter.
+  Availble on https://nikolockenvitz.de/counter.
+  Can be controlled by the buttons or by keyboard (-/+ and arrows).
+
 - decisionmatrix
 
   Webpage to create decision matrices.
   It's available on https://nikolockenvitz.de/decisionmatrix but you can also run it locally or host it yourself.
   You can change, add and delete alternatives and criterias and also move them with drag'n'drop.
   The matrix is auto-saved in local storage, but you can also download it as CSV.
+
+- matrix
+
+  Matrix like animation based on https://github.com/parambirs/matrix.
+  Just minor changes, should be used in fullscreen.
+  Available on https://nikolockenvitz.de/matrix.
+
+- mocking
+
+  Website to change the case of a text for the [Mocking SpongeBob meme](https://imgflip.com/memegenerator/Mocking-Spongebob).
+  Available on https://nikolockenvitz.de/meme.
+  (The script tries to have as much lowercase `i`'s and uppercase `L`'s as possible.)
 
 - rcj-current-delay
 
@@ -24,6 +42,12 @@ Currently this repository includes following files and folders:
   The window can also be controlled by the black bar in the middle.
   You can change the appearance so that you won't see title/close button/etc. of the window (toggle status with right click on black bar).
   The window can be moved with drag and drop (black bar) and supports "locking" (Ctrl+L, see lock.pyw).
+
+- troll
+
+  Whenever someone forgets to lock his/her computer you are supposed to do something funny and memorable so that he/she learns to lock the computer when going away.
+  This site is available on https://nikolockenvitz.de/troll and has links to some cool sites.
+  It's recommended to switch to fullscreen and then select one of the offered sites.
 
 - lock.pyw
 
