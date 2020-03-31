@@ -1,0 +1,60 @@
+body {
+    background: #333;
+    text-align: center;
+}
+
+#input {
+    background: #666;
+    color: #fff;
+    width: 94vw;
+    height: 7em;
+    font-family: "Courier New", Courier, monospace;
+    resize: none;
+    overflow: hidden;
+    border: none;
+    padding: 1vw;
+    border-radius: 2vw;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 5vh;
+    outline: none;
+}
+
+#output-copy {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1;
+}
+#container {
+    z-index: 2;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background-color: inherit;
+}
+#output {
+    color: #ccc;
+    font-family: Impact, Charcoal, sans-serif;
+    font-size: 2em;
+    text-align: center;
+    word-wrap: break-word;
+    margin: 0 1em;
+}
+
+button {
+    background-color: #6699ff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    cursor: pointer;
+    margin: 2em;
+}
