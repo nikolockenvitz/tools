@@ -4,9 +4,10 @@ window.onload = function () {
     let outputCopy = document.getElementById("output-copy");
 
     input.focus();
-    setInterval(function () {
+    input.addEventListener("input", function (event) {
         createMemeText(input, output, outputCopy);
-    }, 100);
+    });
+    initButtonEffect();
 };
 
 function createMemeText (input, output, outputCopy) {
@@ -42,4 +43,41 @@ function copyToClipboard () {
     el.select();
     el.setSelectionRange(0, el.value.length); /*For mobile devices*/
     document.execCommand("copy");
+    el.blur();
+}
+
+let timestampLastAbortedTouchStartEvent = (new Date()).getTime();
+let timestampLastTouchEndEvent = (new Date()).getTime();
+function initButtonEffect () {
+    for (let btn of document.querySelectorAll(".bubbly-button")) {
+        ['mousedown', 'touchstart'].forEach( function(evt) {
+            btn.addEventListener(evt, function () {
+                let t = (new Date()).getTime();
+                if (t - timestampLastTouchEndEvent < 100) {
+                    timestampLastAbortedTouchStartEvent = t;
+                    return;
+                }
+                btn.classList.add("touch-start");
+            });
+        });
+        ['mouseup', 'touchend'].forEach( function(evt) {
+            btn.addEventListener(evt, function (event) {
+                let t = (new Date()).getTime();
+                if (t - timestampLastAbortedTouchStartEvent < 100) return;
+                timestampLastTouchEndEvent = t;
+                copyToClipboard();
+                animateBubblyButton(event);
+            });
+        });
+    }
+}
+function animateBubblyButton (event) {
+    event.target.classList.remove("touch-start");
+    //reset animation
+    event.target.classList.remove("animate");
+
+    event.target.classList.add("animate");
+    setTimeout(function() {
+        event.target.classList.remove("animate");
+    }, 700);
 }
