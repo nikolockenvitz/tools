@@ -8,12 +8,13 @@ window.onload = function () {
         createMemeText(input, output, outputCopy);
     });
     initButtonEffect();
+    createMemeText(input, output, outputCopy);
 };
 
 function createMemeText (input, output, outputCopy) {
     input = input.value;
     let string1 = "", string2 = "", b = true, d = 0, r;
-    input = input.toLowerCase().replace("ß","ss").replace("ä","ae").replace("ö","oe").replace("ü","ue");
+    input = input.toLowerCase().replace(/ß/g,"ss").replace(/ä/g,"ae").replace(/ö/g,"oe").replace(/ü/g,"ue");
     for (let i=0; i<input.length; i++) {
         if ("abcdefghijklmnopqrstuvwxyz".includes(input[i])) {
             string1 += b ? input[i] : input[i].toUpperCase();
