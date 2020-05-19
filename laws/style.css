@@ -9,6 +9,13 @@ html, body {
     font-family: Verdana, Geneva, Tahoma, sans-serif;
 }
 
+button::-moz-focus-inner,
+input[type="reset"]::-moz-focus-inner,
+input[type="button"]::-moz-focus-inner,
+input[type="submit"]::-moz-focus-inner {
+    border: none;
+}
+
 .container {
     margin: 2.5% 5%;
 }
@@ -42,6 +49,13 @@ html, body {
     border: none;
     border-radius: 2px;
     cursor: pointer;
+}
+.container.header > .search-box > button#submit-search:hover,
+.container.header > .search-box > button#submit-search:focus {
+    background-color: #77f;
+}
+.container.header > .search-box > button#submit-search:active {
+    background-color: #88f;
 }
 
 .container .close {

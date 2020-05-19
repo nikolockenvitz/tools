@@ -3,11 +3,13 @@ let laws = {};
 window.onload = function () {
     document.getElementById("submit-search").addEventListener("click", function () {
         showParagraph();
+        if (!isMobile()) focusSearchInput();
     });
     document.getElementById("search").addEventListener("keyup", function (event) {
         if (event.keyCode === 13) { // 13 = Enter Key
             event.preventDefault();
             showParagraph();
+            if (isMobile()) document.getElementById("search").blur();
         }
     });
     focusSearchInput();
@@ -43,7 +45,7 @@ async function showParagraph () {
     clone.querySelector(".close").addEventListener("click", function (event) {
         const container = event.target.parentElement;
         container.parentElement.removeChild(container);
-        focusSearchInput();
+        if (!isMobile()) focusSearchInput();
     });
     addUrlsToExternalLinks(clone, {
         lawShortName,
@@ -55,7 +57,7 @@ async function showParagraph () {
 }
 
 function getLawAndParagraphFromSearch (search) {
-    const [lawShortName, paragraphNumber] = search.split(" ");
+    const [lawShortName, paragraphNumber] = search.toLowerCase().split(" ");
     return { lawShortName, paragraphNumber };
 }
 
@@ -129,4 +131,8 @@ function addUrlsToExternalLinks (clone, {
             `https://www.gesetze-im-internet.de/${lawShortName}/__${paragraphNumber}.html`
         );
     } catch {}
+}
+
+function isMobile () {
+    return screen.width <= 760;
 }
