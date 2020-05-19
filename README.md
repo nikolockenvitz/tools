@@ -5,6 +5,7 @@ Some of them are just for fun, but some of them are really useful.
 Currently this repository includes following files and folders:
 - [lock.pyw](#lockpyw)
 - [toggleTouchscreen.ps1](#toggletouchscreenps1)
+- [laws](#laws)
 - [counter](#counter)
 - [pwtry.pyw](#pwtrypyw)
 - [rcj-current-delay](#rcj-current-delay)
@@ -26,6 +27,11 @@ There is also a script to kill all processes, but you may have to run it several
 This is a simple counter.
 Availble on https://nikolockenvitz.de/counter.
 Can be controlled by the buttons or by keyboard (-/+ and arrows).
+
+### laws
+
+Website to fetch and display German laws from API (https://github.com/bundestag/gesetze).
+Available on https://nikolockenvitz.de/gesetz.
 
 ### matrix
 

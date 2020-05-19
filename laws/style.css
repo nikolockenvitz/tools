@@ -1,0 +1,72 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    background-color: #222;
+    color: #eee;
+    text-align: left;
+}
+* {
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+.container {
+    margin: 2.5% 5%;
+}
+.container.header {
+    width: 90%;
+}
+.container.law {
+    width: 85%;
+    padding: 1% 2.5%;
+    border-radius: 10px;
+    background-color: #333;
+}
+
+.container.header > .search-box {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+.container.header > .search-box > input#search {
+    font-size: 1.5em;
+    width: 75%;
+    margin-right: 10px;
+    border: none;
+    border-radius: 2px;
+    padding: 5px;
+}
+.container.header > .search-box > button#submit-search {
+    font-size: 1.5em;
+    background-color: #66f;
+    color: #fff;
+    border: none;
+    border-radius: 2px;
+    cursor: pointer;
+}
+
+.container .close {
+    color: white;
+    float: right;
+    font-size: 2em;
+    font-weight: bold;
+    margin-right: -2.5%;
+    margin-top: -1%;
+}
+
+.container .close:hover,
+.container .close:focus {
+    color: #f33;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.container.law .title {
+    font-weight: bold;
+}
+
+a {
+    color: #ddd;
+}
+a:hover, a:focus {
+    color: #fff;
+}

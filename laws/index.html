@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="de">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+		<link rel="stylesheet" href="./style.css">
+		<script src="main.js" type="text/javascript" defer></script>
+	</head>
+
+	<body>
+		<div class="container header">
+			<div class="search-box">
+				<input id="search" type="text" placeholder="Gesetz Paragraph (z. B. 'bgb 985')" />
+				<button type="button" id="submit-search">Los</button>
+			</div>
+		</div>
+		<div id="container-law-wrapper">
+			<template>
+				<div class="container law">
+					<span class="close">&times;</span>
+					<p class="title"></p>
+					<div class="text"></div>
+					<p>Externe Links:
+						<a id="github-bundestag-gesetze" target="_blank">github.com/bundestag/gesetze</a>
+						<a id="gesetze-im-internet" target="_blank">gesetze-im-internet.de</a>
+					</p>
+				</div>
+			</template>
+		</div>
+	</body>
+</html>
