@@ -56,8 +56,16 @@ async function showParagraph () {
 }
 
 function getLawAndParagraphFromSearch (search) {
-    const [lawShortName, paragraphNumber] = search.toLowerCase().split(" ");
-    return { lawShortName, paragraphNumber };
+    search = search.toLowerCase();
+
+    // regex: some letters + optionally whitespace + paragraph (starting with number, but then also letters possible)
+    let r = new RegExp("([a-zA-Z]+)\\s*([0-9]{1}[0-9a-zA-Z]*)");
+    matches = r.exec(search);
+
+    return {
+        lawShortName: matches[1],
+        paragraphNumber: matches[2]
+    };
 }
 
 async function getParagraph (lawShortName, paragraphNumber) {
@@ -68,7 +76,9 @@ async function getParagraph (lawShortName, paragraphNumber) {
 }
 
 function getSymbolForParagraphs (lawShortName) {
-    if (lawShortName === "gg") return "Art";
+    if (["gg", "dsgvo", "gdpr"].includes(lawShortName.toLowerCase())) {
+        return "Art";
+    }
     return "§";
 }
 
@@ -88,14 +98,14 @@ function extractParagraph (lawText, paragraphNumber, s="§") {
 }
 
 function getParagraphTitle (lawShortName, paragraphNumber, paragraph) {
-    return `${getCorrectLawShortName(lawShortName)} § ${paragraphNumber} ${getTitleFromParagraph(paragraph)}`;
+    return `${getCorrectLawShortName(lawShortName)} ${getSymbolForParagraphs(lawShortName)} ${paragraphNumber} ${getTitleFromParagraph(paragraph)}`;
 }
 
 function getCorrectLawShortName (lawShortName) {
     try {
         return laws[lawShortName].split("\njurabk: ")[1].split("\n")[0];
     } catch {
-        return lawShortName;
+        return lawShortName.toUpperCase();
     }
 }
 
@@ -103,7 +113,7 @@ function getLawTitle (lawShortName) {
     try {
         return laws[lawShortName].split("\nTitle: ")[1].split("\n")[0];
     } catch {
-        return lawShortName;
+        return getCorrectLawShortName(lawShortName);
     }
 }
 
@@ -126,16 +136,41 @@ function markdownToHtml (text) {
 function addUrlsToExternalLinks (clone, {
     lawShortName, paragraphNumber, paragraph
 }) {
+    if (["dsgvo", "gdpr"].includes(lawShortName.toLowerCase())) {
+        try {
+            const a = clone.querySelector("a#dsgvo-gesetz");
+            a.setAttribute("href",
+                `https://dsgvo-gesetz.de/art-${paragraphNumber}-dsgvo/`
+            );
+            a.classList.remove("hidden");
+        } catch {}
+        return;
+    }
+
     try {
-        clone.querySelector("a#github-bundestag-gesetze").setAttribute("href",
-            `https://github.com/bundestag/gesetze/blob/master/${lawShortName[0]}/${lawShortName}/index.md`
-            +`#-${paragraphNumber}-${getTitleFromParagraph(paragraph).replace(/ /g, "-")}`
+        let anchor;
+        const s = getSymbolForParagraphs(lawShortName);
+        let title = `${getTitleFromParagraph(paragraph).replace(/ /g, "-")}`;
+        if (title !== "") title = "-" +  title;
+        if (s === "§") {
+            anchor = `-${paragraphNumber}${title}`;
+        } else {
+            anchor = `${s.toLowerCase()}-${paragraphNumber}${title}`;
+        }
+        const a = clone.querySelector("a#github-bundestag-gesetze");
+        a.setAttribute("href",
+            `https://github.com/bundestag/gesetze/blob/master/${lawShortName[0]}/${lawShortName}/index.md#${anchor}`
         );
+        a.classList.remove("hidden");
     } catch {}
     try {
-        clone.querySelector("a#gesetze-im-internet").setAttribute("href",
-            `https://www.gesetze-im-internet.de/${lawShortName}/__${paragraphNumber}.html`
+        let s = getSymbolForParagraphs(lawShortName);
+        if (s === "§") s = "_";
+        const a = clone.querySelector("a#gesetze-im-internet");
+        a.setAttribute("href",
+            `https://www.gesetze-im-internet.de/${lawShortName}/${s.toLowerCase()}_${paragraphNumber}.html`
         );
+        a.classList.remove("hidden");
     } catch {}
 }
 
