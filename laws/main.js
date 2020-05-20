@@ -45,7 +45,6 @@ async function showParagraph () {
     clone.querySelector(".close").addEventListener("click", function (event) {
         const container = event.target.parentElement;
         container.parentElement.removeChild(container);
-        if (!isMobile()) focusSearchInput();
     });
     addUrlsToExternalLinks(clone, {
         lawShortName,
@@ -65,7 +64,12 @@ async function getParagraph (lawShortName, paragraphNumber) {
     if (laws[lawShortName] === undefined) {
         await loadLaw(lawShortName);
     }
-    return extractParagraph(laws[lawShortName], paragraphNumber);
+    return extractParagraph(laws[lawShortName], paragraphNumber, getSymbolForParagraphs(lawShortName));
+}
+
+function getSymbolForParagraphs (lawShortName) {
+    if (lawShortName === "gg") return "Art";
+    return "§";
 }
 
 async function loadLaw (lawShortName) {
@@ -77,8 +81,10 @@ function getLawUrl (lawName) {
     return `https://raw.githubusercontent.com/bundestag/gesetze/master/${lawName[0]}/${lawName}/index.md`;
 }
 
-function extractParagraph (lawText, paragraphNumber) {
-    return lawText.split(`# § ${paragraphNumber} `)[1].split("# §")[0].replace(/#*$/, "");
+function extractParagraph (lawText, paragraphNumber, s="§") {
+    const splitted = lawText.split(`# ${s} ${paragraphNumber}`);
+    const headingLevel = (new RegExp("\n#*$")).exec(splitted[0])[0].length; // the last '#' is not counted but the '\n' is (-> +1 -1 cancels out)
+    return splitted[1].split(new RegExp(`\n#{1,${headingLevel}} .*`))[0];
 }
 
 function getParagraphTitle (lawShortName, paragraphNumber, paragraph) {
@@ -102,7 +108,7 @@ function getLawTitle (lawShortName) {
 }
 
 function getTitleFromParagraph (paragraph) {
-    return paragraph.split("\n\n")[0]
+    return paragraph.split("\n\n")[0].trim();
 }
 
 function getParagraphText (paragraph) {

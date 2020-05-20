@@ -5,6 +5,9 @@ html, body {
     color: #eee;
     text-align: left;
 }
+html {
+    height: 101%; /* show scrollbar even if not necessary -> constant width of content */
+}
 * {
     font-family: Verdana, Geneva, Tahoma, sans-serif;
 }
