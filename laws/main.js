@@ -1,5 +1,7 @@
 let laws = {};
 
+const NOT_FOUND = "- ?";
+
 window.onload = function () {
     document.getElementById("submit-search").addEventListener("click", function () {
         showParagraph();
@@ -26,21 +28,18 @@ async function showParagraph () {
     const search = document.getElementById("search").value;
     const { lawShortName, paragraphNumber } = getLawAndParagraphFromSearch(search);
 
-    let paragraph, paragraphTitle, paragraphText;
     try {
-        paragraph = await getParagraph(lawShortName, paragraphNumber);
-        paragraphTitle = getParagraphTitle(lawShortName, paragraphNumber, paragraph);
-        paragraphText = getParagraphText(paragraph);
-    } catch {
-        paragraph = "";
-        paragraphTitle = getParagraphTitle(lawShortName, paragraphNumber, "- ?");
+        var { paragraphTitle, paragraphText } = await getParagraphTitleAndText(lawShortName, paragraphNumber);
+    } catch {}
+    if (paragraphTitle === undefined || paragraphText === undefined) {
+        paragraphTitle = NOT_FOUND;
         paragraphText = "---";
     }
 
     let templ = document.querySelector("template");
     let clone = templ.content.cloneNode(true);
-    clone.querySelector(".title").textContent = paragraphTitle;
-    clone.querySelector(".title").setAttribute("title", getLawTitle(lawShortName));
+    clone.querySelector(".title").textContent = getCompleteParagraphTitle(lawShortName, paragraphNumber, paragraphTitle);
+    clone.querySelector(".title").setAttribute("title", getCompleteLawTitle(lawShortName));
     clone.querySelector(".text").innerHTML = markdownToHtml(paragraphText);
     clone.querySelector(".close").addEventListener("click", function (event) {
         const container = event.target.parentElement;
@@ -49,7 +48,7 @@ async function showParagraph () {
     addUrlsToExternalLinks(clone, {
         lawShortName,
         paragraphNumber,
-        paragraph
+        paragraphTitle
     });
 
     wrapper.prepend(clone);
@@ -68,11 +67,14 @@ function getLawAndParagraphFromSearch (search) {
     };
 }
 
-async function getParagraph (lawShortName, paragraphNumber) {
+async function getParagraphTitleAndText (lawShortName, paragraphNumber) {
+    if (["dsgvo", "gdpr"].includes(lawShortName)) {
+        return { paragraphTitle: "", paragraphText: "" };
+    }
     if (laws[lawShortName] === undefined) {
         await loadLaw(lawShortName);
     }
-    return extractParagraph(laws[lawShortName], paragraphNumber, getSymbolForParagraphs(lawShortName));
+    return extractParagraphTitleAndText(laws[lawShortName], paragraphNumber, getSymbolForParagraphs(lawShortName));
 }
 
 function getSymbolForParagraphs (lawShortName) {
@@ -91,14 +93,125 @@ function getLawUrl (lawName) {
     return `https://raw.githubusercontent.com/bundestag/gesetze/master/${lawName[0]}/${lawName}/index.md`;
 }
 
-function extractParagraph (lawText, paragraphNumber, s="§") {
-    const splitted = lawText.split(`# ${s} ${paragraphNumber}`);
-    const headingLevel = (new RegExp("\n#*$")).exec(splitted[0])[0].length; // the last '#' is not counted but the '\n' is (-> +1 -1 cancels out)
-    return splitted[1].split(new RegExp(`\n#{1,${headingLevel}} .*`))[0];
+function extractParagraphTitleAndText (lawText, paragraphNumber, s="§") {
+    const titleRegex = getTitleRegex(paragraphNumber, s);
+    let matches = titleRegex.exec(lawText);
+    if (matches) {
+        var paragraphTitle = matches[2].trim();
+    } else {
+        if (lawText === "404: Not Found") {
+            return {
+                paragraphTitle: "",
+                paragraphText: lawText
+            };
+        }
+        return extractTitleAndTextIfParagraphIsNoLongerApplicable(lawText, paragraphNumber, s);
+    }
+    const headingLevel = matches[1].length;
+    const paragraphText = matches[3].trim().split(new RegExp(`(^|[^#])#{1,${headingLevel}} .*`))[0];
+    return {
+        paragraphTitle,
+        paragraphText
+    };
 }
 
-function getParagraphTitle (lawShortName, paragraphNumber, paragraph) {
-    return `${getCorrectLawShortName(lawShortName)} ${getSymbolForParagraphs(lawShortName)} ${paragraphNumber} ${getTitleFromParagraph(paragraph)}`;
+function getTitleRegex (paragraphNumber, s="§") {
+    return new RegExp(`\\n(#*) ${s} ${paragraphNumber}(| [^\\n]*)\\n([^]*)$`);
+}
+
+function extractTitleAndTextIfParagraphIsNoLongerApplicable (lawText, paragraphNumber, s="§", tryAllLetters=false) {
+    /* ##### (XXXX) §§ 3 bis 6 (weggefallen)
+     * ##### (XXXX) §§ 114, 115 (weggefallen)
+     * ##### (XXXX) §§ 611a und 611b (weggefallen)
+     * ###### (XXXX) §§ 1615b bis 1615k (weggefallen)
+     * ### (XXXX) Art 74a und 75 (weggefallen)
+     * 
+     * single paragraphs that are no longer applicable are already caught by general function
+     * e.g. §§ 10, 279, 361 BGB
+     */
+    if (s === "§") s = "§§";
+
+    // count down until corresponding line has been found
+    let r, matches;
+    let tempParagraphNumber = paragraphNumber;
+    let i = 0, maxIterations = 100;
+    while (tempParagraphNumber !== "0" && tempParagraphNumber[0] !== "-") {
+        const titleRegex = getTitleRegex(tempParagraphNumber, s);
+        if (titleRegex.exec(lawText)) break;
+
+        r = new RegExp(`# (\\(XXXX\\) ${s} ${tempParagraphNumber}[ ,][^#]*\\(weggefallen\\))`);
+        matches = r.exec(lawText);
+        if (matches) {
+            if (!isParagraphInRangeOfNoLongerApplicableParagraphs(paragraphNumber, matches[1])) {
+                return;
+            } else {
+                return {
+                    paragraphTitle: "(weggefallen)",
+                    paragraphText: matches[1]
+                };
+            }
+        }
+        tempParagraphNumber = getPreviousParagraphNumber(tempParagraphNumber, tryAllLetters);
+        i++;
+        if (i > maxIterations) break;
+    }
+    if (!tryAllLetters) {
+        return extractTitleAndTextIfParagraphIsNoLongerApplicable(lawText, paragraphNumber, s, true);
+    }
+}
+
+function isParagraphInRangeOfNoLongerApplicableParagraphs (paragraphNumber, range) {
+    const r = new RegExp(`([1-9][0-9]*[a-z]?)[^0-9]*([1-9][0-9]*[a-z]?)`);
+    const matches = r.exec(range);
+
+    const paragraph = getParagraphNumberAndLetter(paragraphNumber);
+    const rangeStart = getParagraphNumberAndLetter(matches[1]);
+    const rangeEnd = getParagraphNumberAndLetter(matches[2]);
+
+    if (!range.includes(" bis ")) {
+        // no range but a list of all paragraphs
+        if (paragraphNumber === matches[1] || paragraphNumber === matches[2]) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    if (paragraph.number > rangeEnd.number ||
+        (paragraph.number === rangeEnd.number &&
+            paragraph.letter > rangeEnd.letter) ||
+        paragraph.number < rangeStart.number ||
+        (paragraph.number === rangeStart.number &&
+            paragraph.letter < rangeStart.letter)) {
+        return false;
+    } else {
+        return true;
+    }
+}
+
+// assumption: paragraph starts with some numbers and may end with one lower-case letter
+function getPreviousParagraphNumber (paragraphNumber, z=false) {
+    const { number, letter } = getParagraphNumberAndLetter(paragraphNumber);
+    if (letter === "" || letter === "a") {
+        return `${number - 1}${letter === "" && z ? "z" : ""}`;
+    } else {
+        return `${number}${String.fromCharCode(letter.charCodeAt(0) - 1)}`;
+    }
+}
+function getParagraphNumberAndLetter (paragraphNumber) {
+    const r = new RegExp(`^([1-9][0-9]*)([a-z]?)$`);
+    const matches = r.exec(paragraphNumber);
+    if (!matches) throw new Error(`Unexpected Paragraph Number: ${paragraphNumber}`);
+
+    return {
+        number: Number(matches[1]),
+        letter: matches[2]
+    };
+}
+
+function getCompleteParagraphTitle (lawShortName, paragraphNumber, paragraphTitle) {
+    return `${getCorrectLawShortName(lawShortName)} ${getSymbolForParagraphs(lawShortName)}`
+        + ` ${paragraphNumber}${paragraphTitle ? " " : ""}${paragraphTitle}`;
 }
 
 function getCorrectLawShortName (lawShortName) {
@@ -109,22 +222,12 @@ function getCorrectLawShortName (lawShortName) {
     }
 }
 
-function getLawTitle (lawShortName) {
+function getCompleteLawTitle (lawShortName) {
     try {
         return laws[lawShortName].split("\nTitle: ")[1].split("\n")[0];
     } catch {
         return getCorrectLawShortName(lawShortName);
     }
-}
-
-function getTitleFromParagraph (paragraph) {
-    return paragraph.split("\n\n")[0].trim();
-}
-
-function getParagraphText (paragraph) {
-    let temp = paragraph.split("\n\n");
-    temp.shift();
-    return temp.join("\n\n");
 }
 
 function markdownToHtml (text) {
@@ -134,7 +237,7 @@ function markdownToHtml (text) {
 }
 
 function addUrlsToExternalLinks (clone, {
-    lawShortName, paragraphNumber, paragraph
+    lawShortName, paragraphNumber, paragraphTitle
 }) {
     if (["dsgvo", "gdpr"].includes(lawShortName.toLowerCase())) {
         try {
@@ -150,16 +253,18 @@ function addUrlsToExternalLinks (clone, {
     try {
         let anchor;
         const s = getSymbolForParagraphs(lawShortName);
-        let title = `${getTitleFromParagraph(paragraph).replace(/ /g, "-")}`;
-        if (title !== "") title = "-" +  title;
-        if (s === "§") {
-            anchor = `-${paragraphNumber}${title}`;
+        let title = paragraphTitle.replace(/ /g, "-");
+        if (title !== "") title = "-" + title;
+        if (!paragraphTitle || paragraphTitle === NOT_FOUND || paragraphTitle.includes("weggefallen")) {
+            anchor = "";
+        } else if (s === "§") {
+            anchor = `#-${paragraphNumber}${title}`;
         } else {
-            anchor = `${s.toLowerCase()}-${paragraphNumber}${title}`;
+            anchor = `#${s.toLowerCase()}-${paragraphNumber}${title}`;
         }
         const a = clone.querySelector("a#github-bundestag-gesetze");
         a.setAttribute("href",
-            `https://github.com/bundestag/gesetze/blob/master/${lawShortName[0]}/${lawShortName}/index.md#${anchor}`
+            `https://github.com/bundestag/gesetze/blob/master/${lawShortName[0]}/${lawShortName}/index.md${anchor}`
         );
         a.classList.remove("hidden");
     } catch {}
