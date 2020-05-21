@@ -34,7 +34,6 @@ input[type="submit"]::-moz-focus-inner {
 
 .container.header > .search-box {
     display: flex;
-    flex-wrap: wrap;
     justify-content: center;
 }
 .container.header > .search-box > input#search {
@@ -59,6 +58,16 @@ input[type="submit"]::-moz-focus-inner {
 }
 .container.header > .search-box > button#submit-search:active {
     background-color: #88f;
+}
+
+@media only screen and (max-width: 760px) {
+    .container.header > .search-box > input#search {
+        width: unset;
+        flex: 1;
+    }
+    .container.header > .search-box > button#submit-search {
+        flex: 0;
+    }
 }
 
 .container .close {
