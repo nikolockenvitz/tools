@@ -6,7 +6,8 @@ html, body {
     text-align: left;
 }
 html {
-    height: 101%; /* show scrollbar even if not necessary -> constant width of content */
+    /* show scrollbar even if not necessary -> constant width of content */
+    overflow-y: scroll;
 }
 * {
     font-family: Verdana, Geneva, Tahoma, sans-serif;
