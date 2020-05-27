@@ -1,5 +1,10 @@
 let laws = {};
 
+const lawShortNameMapping = {
+    "gdpr": "dsgvo",
+    "uwg": "uwg_2004",
+};
+
 const NOT_FOUND = "- ?";
 
 window.onload = function () {
@@ -26,7 +31,8 @@ function focusSearchInput () {
 async function showParagraph () {
     const wrapper = document.getElementById("container-law-wrapper");
     const search = document.getElementById("search").value;
-    const { lawShortName, paragraphNumber } = getLawAndParagraphFromSearch(search);
+    let { lawShortName, paragraphNumber } = getLawAndParagraphFromSearch(search);
+    lawShortName = mapLawShortName(lawShortName);
 
     try {
         var { paragraphTitle, paragraphText } = await getParagraphTitleAndText(lawShortName, paragraphNumber);
@@ -57,6 +63,15 @@ async function showParagraph () {
 function getLawAndParagraphFromSearch (search) {
     search = search.toLowerCase();
 
+    const numberOfSpacesInSearch = (search.match(/ /g) || []).length;
+    if (numberOfSpacesInSearch === 1) {
+        const splitted = search.split(" ");
+        return {
+            lawShortName: splitted[0],
+            paragraphNumber: splitted[1]
+        };
+    }
+
     // regex: some letters + optionally whitespace + paragraph (starting with number, but then also letters possible)
     let r = new RegExp("([a-zA-Z]+)\\s*([0-9]{1}[0-9a-zA-Z]*)");
     matches = r.exec(search);
@@ -67,8 +82,15 @@ function getLawAndParagraphFromSearch (search) {
     };
 }
 
+function mapLawShortName (lawShortName) {
+    if (lawShortName in lawShortNameMapping) {
+        return lawShortNameMapping[lawShortName];
+    }
+    return lawShortName;
+}
+
 async function getParagraphTitleAndText (lawShortName, paragraphNumber) {
-    if (["dsgvo", "gdpr"].includes(lawShortName)) {
+    if (lawShortName === "dsgvo") {
         return { paragraphTitle: "", paragraphText: "" };
     }
     if (laws[lawShortName] === undefined) {
@@ -78,7 +100,7 @@ async function getParagraphTitleAndText (lawShortName, paragraphNumber) {
 }
 
 function getSymbolForParagraphs (lawShortName) {
-    if (["gg", "dsgvo", "gdpr"].includes(lawShortName.toLowerCase())) {
+    if (["gg", "dsgvo", "bgbeg"].includes(lawShortName)) {
         return "Art";
     }
     return "§";
@@ -239,7 +261,7 @@ function markdownToHtml (text) {
 function addUrlsToExternalLinks (clone, {
     lawShortName, paragraphNumber, paragraphTitle
 }) {
-    if (["dsgvo", "gdpr"].includes(lawShortName.toLowerCase())) {
+    if (lawShortName === "dsgvo") {
         try {
             const a = clone.querySelector("a#dsgvo-gesetz");
             a.setAttribute("href",
@@ -269,6 +291,7 @@ function addUrlsToExternalLinks (clone, {
         a.classList.remove("hidden");
     } catch {}
     try {
+        if (lawShortName === "bgbeg") throw new Error("not working");
         let s = getSymbolForParagraphs(lawShortName);
         if (s === "§") s = "_";
         const a = clone.querySelector("a#gesetze-im-internet");
