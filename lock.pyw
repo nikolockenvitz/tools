@@ -27,7 +27,10 @@ class Lock:
 
     def activateLocking(self, event=None):
         self.setLockState(True)
-        self.root.focus()
+        self.focus()
+
+    def focus(self):
+        self.root.focus_force()
 
     def exit(self, event=None):
         if(self.lockState != False): return
