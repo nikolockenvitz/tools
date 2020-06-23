@@ -1,3 +1,7 @@
+const url = new URL(window.location.href);
+const KEY_CODE_ENTER = 13;
+const KEY_CODE_SPACE = 32;
+
 let laws = {};
 
 const lawShortNameMapping = {
@@ -12,20 +16,37 @@ window.onload = function () {
         showParagraph();
         if (!isMobile()) focusSearchInput();
     });
-    document.getElementById("search").addEventListener("keyup", function (event) {
-        if (event.keyCode === 13) { // 13 = Enter Key
-            event.preventDefault();
-            showParagraph();
-            if (isMobile()) document.getElementById("search").blur();
-        }
+    onKeyPress(KEY_CODE_ENTER, document.getElementById("search"), function (event) {
+        event.preventDefault();
+        showParagraph();
+        if (isMobile()) document.getElementById("search").blur();
     });
     focusSearchInput();
+    showParagraphIfInURL();
 };
+
+function onKeyPress (keyCode, element, eventHandler) {
+    element.addEventListener("keyup", function (event) {
+        if (event.keyCode === keyCode) {
+            eventHandler(event);
+        }
+    });
+}
 
 function focusSearchInput () {
     const searchInput = document.getElementById("search");
     searchInput.focus();
     searchInput.setSelectionRange(searchInput.value.length, searchInput.value.length);
+}
+
+function showParagraphIfInURL () {
+    const urlQuery = url.searchParams.get("s");
+    const urlHash = url.hash.slice(1);
+    const search = urlQuery || urlHash;
+    if (search) {
+        document.getElementById("search").value = search;
+        showParagraph();
+    }
 }
 
 async function showParagraph () {
@@ -47,10 +68,31 @@ async function showParagraph () {
     clone.querySelector(".title").textContent = getCompleteParagraphTitle(lawShortName, paragraphNumber, paragraphTitle);
     clone.querySelector(".title").setAttribute("title", getCompleteLawTitle(lawShortName));
     clone.querySelector(".text").innerHTML = markdownToHtml(paragraphText);
-    clone.querySelector(".close").addEventListener("click", function (event) {
-        const container = event.target.parentElement;
+
+    const btnClose = clone.querySelector(".close");
+    function onClickClose (event) {
+        let container = event.target;
+        while (!container.classList.contains("container")) {
+            container = container.parentElement;
+            if (container === null) return;
+        }
         container.parentElement.removeChild(container);
-    });
+    };
+    btnClose.addEventListener("click", onClickClose);
+    onKeyPress(KEY_CODE_ENTER, btnClose, onClickClose);
+    onKeyPress(KEY_CODE_SPACE, btnClose, onClickClose);
+
+    const btnCopy = clone.querySelector(".copy")
+    function onClickCopy () {
+        let shareUrl = url;
+        shareUrl.hash = "";
+        shareUrl.searchParams.set("s", search);
+        copyTextToClipboard(shareUrl.toString(), btnCopy);
+    };
+    btnCopy.addEventListener("click", onClickCopy);
+    onKeyPress(KEY_CODE_ENTER, btnCopy, onClickCopy);
+    onKeyPress(KEY_CODE_SPACE, btnCopy, onClickCopy);
+
     addUrlsToExternalLinks(clone, {
         lawShortName,
         paragraphNumber,
@@ -304,4 +346,21 @@ function addUrlsToExternalLinks (clone, {
 
 function isMobile () {
     return screen.width <= 760;
+}
+
+function copyTextToClipboard (text, confirmationElement) {
+    const input = document.getElementById("input-copy");
+    input.value = text;
+    input.select();
+    input.setSelectionRange(0, text.length);
+    document.execCommand("copy");
+    input.blur();
+    showCopySuccessful(confirmationElement);
+}
+
+function showCopySuccessful (confirmationElement) {
+    confirmationElement.classList.add("successful");
+    setTimeout(function () {
+        confirmationElement.classList.remove("successful");
+    }, 1200);
 }

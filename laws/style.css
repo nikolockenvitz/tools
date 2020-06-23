@@ -31,6 +31,7 @@ input[type="submit"]::-moz-focus-inner {
     padding: 1% 2.5%;
     border-radius: 10px;
     background-color: #333;
+    position: relative;
 }
 
 .container.header > .search-box {
@@ -71,21 +72,49 @@ input[type="submit"]::-moz-focus-inner {
     }
 }
 
-.container .close {
-    color: white;
-    float: right;
+.container .btn-top-right {
+    position: absolute;
     font-size: 2em;
-    font-weight: bold;
-    margin-right: -2.5%;
-    margin-top: -1%;
+    cursor: pointer;
+    top: 0.25em;
+    right: 0.25em;
+}
+.container .btn-top-right svg {
+    width: 1em;
+    height: 1em;
+}
+.container .copy {
+    right: 1.25em;
 }
 
-.container .close:hover,
-.container .close:focus {
-    color: #f33;
-    text-decoration: none;
-    cursor: pointer;
+.container .close svg * {
+    fill: #fff;
 }
+.container .close svg:hover *,
+.container .close svg:focus * {
+    fill: #f33;
+}
+
+.container .copy svg * {
+    stroke: #fff;
+}
+@media (hover: hover) {
+    .container .copy svg:hover *,
+    .container .copy svg:focus * {
+        stroke: #77f;
+    }
+}
+
+.container .copy.successful svg *:not(.copy-success) {
+    display: none;
+}
+.container .copy svg *.copy-success {
+    display: none;
+}
+.container .copy.successful svg *.copy-success {
+    display: initial;
+}
+
 
 .container.law .title {
     font-weight: bold;
