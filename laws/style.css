@@ -46,6 +46,9 @@ input[type="submit"]::-moz-focus-inner {
     border-radius: 2px;
     padding: 5px;
 }
+input#search.error {
+    background-color: #f33;
+}
 .container.header > .search-box > button#submit-search {
     font-size: 1.5em;
     background-color: #66f;

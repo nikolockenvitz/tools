@@ -16,10 +16,14 @@ window.onload = function () {
         showParagraph();
         if (!isMobile()) focusSearchInput();
     });
-    onKeyPress(KEY_CODE_ENTER, document.getElementById("search"), function (event) {
+    const search = document.getElementById("search");
+    onKeyPress(KEY_CODE_ENTER, search, function (event) {
         event.preventDefault();
         showParagraph();
-        if (isMobile()) document.getElementById("search").blur();
+        if (isMobile()) search.blur();
+    });
+    search.addEventListener("input", function () {
+        search.classList.remove("error");
     });
     focusSearchInput();
     showParagraphIfInURL();
@@ -53,6 +57,11 @@ async function showParagraph () {
     const wrapper = document.getElementById("container-law-wrapper");
     const search = document.getElementById("search").value;
     let { lawShortName, paragraphNumber } = getLawAndParagraphFromSearch(search);
+    if (lawShortName === undefined || paragraphNumber === undefined) {
+        document.getElementById("search").classList.add("error");
+        return;
+    }
+    document.getElementById("search").classList.remove("error");
     lawShortName = mapLawShortName(lawShortName);
 
     try {
@@ -103,25 +112,47 @@ async function showParagraph () {
 }
 
 function getLawAndParagraphFromSearch (search) {
-    search = search.toLowerCase();
+    search = search.toLowerCase().trim();
 
-    const numberOfSpacesInSearch = (search.match(/ /g) || []).length;
-    if (numberOfSpacesInSearch === 1) {
-        const splitted = search.split(" ");
-        return {
-            lawShortName: splitted[0],
-            paragraphNumber: splitted[1]
-        };
+    /* assumptions:
+     * - name of law starts with a letter
+     * - if name includes numbers it will be after an underscore
+     * - paragraph starts with a number and can include letters at the end
+     */
+
+    const regexes = [
+        {
+            // law name (only letters) + optional whitespace + paragraph
+            r: new RegExp("^([a-z]+)\\s*([0-9]{1}[^\\s]*)$"),
+            lawFirst: true,
+        },
+        {
+            // law name (letters/numbers) + whitespace + paragraph
+            r: new RegExp("^([a-z]+_[^\\s]+)\\s+([0-9]{1}[^\\s]*)$"),
+            lawFirst: true,
+        },
+        {
+            // paragraph + whitespace + law name
+            r: new RegExp("^([0-9]{1}[^\\s]*)\\s+([a-z]{1}[^\\s]*)$"),
+            lawFirst: false,
+        },
+        {
+            // paragraph (only numbers) + (no whitespace) + law name
+            r: new RegExp("^([0-9]+)([a-z]{1}[^\\s]*)$"),
+            lawFirst: false,
+        },
+    ];
+    for (const regex of regexes) {
+        const matches = regex.r.exec(search);
+        if (matches) {
+            return {
+                lawShortName: matches[regex.lawFirst ? 1 : 2],
+                paragraphNumber: matches[regex.lawFirst ? 2 : 1],
+            };
+        }
     }
 
-    // regex: some letters + optionally whitespace + paragraph (starting with number, but then also letters possible)
-    let r = new RegExp("([a-zA-Z]+)\\s*([0-9]{1}[0-9a-zA-Z]*)");
-    matches = r.exec(search);
-
-    return {
-        lawShortName: matches[1],
-        paragraphNumber: matches[2]
-    };
+    return { lawShortName: undefined, paragraphNumber: undefined };
 }
 
 function mapLawShortName (lawShortName) {
