@@ -76,7 +76,7 @@ async function showParagraph () {
     let clone = templ.content.cloneNode(true);
     clone.querySelector(".title").textContent = getCompleteParagraphTitle(lawShortName, paragraphNumber, paragraphTitle);
     clone.querySelector(".title").setAttribute("title", getCompleteLawTitle(lawShortName));
-    clone.querySelector(".text").innerHTML = markdownToHtml(paragraphText);
+    insertMarkdownIntoDiv(clone.querySelector(".text"), paragraphText);
 
     const btnClose = clone.querySelector(".close");
     function onClickClose (event) {
@@ -325,10 +325,12 @@ function getCompleteLawTitle (lawShortName) {
     }
 }
 
-function markdownToHtml (text) {
-    text = text
-        .replace(/\n\n/g, "<br>");
-    return text;
+function insertMarkdownIntoDiv (element, markdown) {
+    // currently supports only line breaks
+    for (const line of markdown.split(/\n\n/)) {
+        element.appendChild(document.createTextNode(line));
+        element.appendChild(document.createElement("br"));
+    }
 }
 
 function addUrlsToExternalLinks (clone, {
