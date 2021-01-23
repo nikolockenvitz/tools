@@ -15,7 +15,7 @@ body {
     padding: 1vw;
     border-radius: 2vw;
     display: block;
-    margin: 2em auto;
+    margin: 2em auto 0;
     outline: none;
 }
 
@@ -43,12 +43,96 @@ body {
     margin: 1em;
 }
 
+/* switch */
+.switch-container {
+    color: #aaa;
+    font-family: sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 2em 0;
+}
+.switch-container span.option-label {
+    margin: 8px;
+    flex-grow: 1;
+    flex-basis: 1px;
+    text-align: left;
+}
+.switch-container span.option-label:first-child {
+    text-align: right;
+}
+.switch-container span.option-label.selected {
+    color: #fff;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+/* https://www.w3schools.com/howto/howto_css_switch.asp */
+/* The switch - the box around the slider */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+/* Hide default HTML checkbox */
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+/* The slider */
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #888;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: #fff;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+input:checked + .slider {
+    background-color: #6699ff;
+}
+input:focus + .slider {
+    box-shadow: 0 0 1px #6699ff;
+}
+input:checked + .slider:before {
+    -webkit-transform: translateX(26px);
+    -ms-transform: translateX(26px);
+    transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.slider.round {
+    border-radius: 34px;
+}
+.slider.round:before {
+    border-radius: 50%;
+}
+
 /* https://codepen.io/nourabusoud/pen/ypZzMM */
 .bubbly-button {
     display: inline-block;
     font-size: 16px;
     padding: 1em 2em;
-    margin: 1.2em auto;
+    margin: 0 auto;
     -webkit-appearance: none;
     appearance: none;
     background-color: #6699ff;

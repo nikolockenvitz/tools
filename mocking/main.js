@@ -1,37 +1,57 @@
 window.onload = function () {
-    let input = document.getElementById("input");
-    let output = document.getElementById("output");
-    let outputCopy = document.getElementById("output-copy");
+    const input = document.getElementById("input");
+    const switchRandomAlternateCase = document.getElementById("switch");
+    const switchOptions = document.querySelectorAll(".switch-container .option-label");
+    const output = document.getElementById("output");
+    const outputCopy = document.getElementById("output-copy");
+
+    function updateMemeText() {
+        createMemeText(input, switchRandomAlternateCase, output, outputCopy);
+    }
+    function updateSwitchLabels() {
+        const alternateCase = switchRandomAlternateCase.checked;
+        switchOptions[alternateCase ? 0:1].classList.remove("selected");
+        switchOptions[alternateCase ? 1:0].classList.add("selected");
+    }
 
     input.focus();
     input.addEventListener("input", function (event) {
-        createMemeText(input, output, outputCopy);
+        updateMemeText();
     });
+    switchRandomAlternateCase.addEventListener("input", () => {
+        updateSwitchLabels();
+        updateMemeText();
+    })
     initButtonEffect();
-    createMemeText(input, output, outputCopy);
+    updateSwitchLabels();
+    updateMemeText();
 };
 
-function createMemeText (input, output, outputCopy) {
+function createMemeText (input, switchRandomAlternateCase, output, outputCopy) {
+    const alternateCase = switchRandomAlternateCase.checked;
     input = input.value;
-    let string1 = "", string2 = "", b = true, d = 0, r;
+    let string1 = "", string2 = "", b = true, d = 0, random = 0;
     input = input.toLowerCase().replace(/ß/g,"ss").replace(/ä/g,"ae").replace(/ö/g,"oe").replace(/ü/g,"ue");
     for (let i=0; i<input.length; i++) {
         if ("abcdefghijklmnopqrstuvwxyz".includes(input[i])) {
-            string1 += b ? input[i] : input[i].toUpperCase();
-            string2 += b ? input[i].toUpperCase() : input[i];
-            if (input[i] === "i") { d += b ? 1 : -1; }
-            if (input[i] === "l") { d += b ? -1 : 1; }
-            b = !b;
+            if (alternateCase) {
+                string1 += b ? input[i] : input[i].toUpperCase();
+                string2 += b ? input[i].toUpperCase() : input[i];
+                if (input[i] === "i") { d += b ? 1 : -1; }
+                if (input[i] === "l") { d += b ? -1 : 1; }
+                b = !b;
+            } else {
+                random = Math.random();
+                if (input[i] === "i") random = 0;
+                if (input[i] === "l") random = 1;
+                string1 += random < 0.5 ? input[i] : input[i].toUpperCase();
+            }
         } else {
             string1 += input[i];
             string2 += input[i];
         }
     }
-    if (d >= 0) {
-        r = string1;
-    } else {
-        r = string2;
-    }
+    const r = d >= 0 ? string1 : string2;
 
     if (output.innerText !== r) {
         output.innerText = r;
