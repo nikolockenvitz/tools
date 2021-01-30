@@ -7,6 +7,7 @@ Currently this repository includes following files and folders:
 - [toggleTouchscreen.ps1](#toggletouchscreenps1)
 - [counter](#counter)
 - [pwtry.pyw](#pwtrypyw)
+- [rr](#rr)
 - [rcj-current-delay](#rcj-current-delay)
 - [mocking](#mocking)
 - [troll](#troll)
@@ -46,6 +47,12 @@ It supports four fields, you can increase, decrease and reset each delay.
 The window can also be controlled by the black bar in the middle.
 You can change the appearance so that you won't see title/close button/etc. of the window (toggle status with right click on black bar).
 The window can be moved with drag and drop (black bar) and supports "locking" (Ctrl+L, see lock.pyw).
+
+### rr
+
+Put https://nikolockenvitz.de/rr# before the acutal URL and visitors will be rick-rolled.
+Probability of rick-rolling can be defined with query parameter `p`.
+As this page redirects, you can go back to it and click on the correct link (if it's not blocked by your browser).
 
 ### troll
 
