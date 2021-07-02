@@ -2,7 +2,7 @@
 # Replace the device name (line 10) according to your touch screen name found in device manager
 # Create a shortcut to this script
 # Right-click on shortcut -> Properties -> Shortcut
-# Insert 'powershell -f' before path in target
+# Insert 'powershell -ExecutionPolicy Bypass -File ' before path in target
 # Click 'Advanced...'
 # Check 'Run as administrator'
 # Apply and OK
@@ -17,3 +17,4 @@ Else {
 	Write-Output "Enabling touch screen"
 	$d | Enable-PnpDevice -Confirm:$false
 }
+
