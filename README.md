@@ -1,8 +1,11 @@
 # tools
+
 This is a collection of short scripts which may do not deserve an own repository.
 Some of them are just for fun, but some of them are really useful.
 
 Currently this repository includes following files and folders:
+
+<!-- no toc -->
 - [lock.pyw](#lockpyw)
 - [toggleTouchscreen.ps1](#toggletouchscreenps1)
 - [counter](#counter)
@@ -53,12 +56,6 @@ The window can be moved with drag and drop (black bar) and supports "locking" (C
 Put https://nikolockenvitz.de/rr# before the acutal URL and visitors will be rick-rolled.
 Probability of rick-rolling can be defined with query parameter `p`.
 As this page redirects, you can go back to it and click on the correct link (if it's not blocked by your browser).
-
-### troll
-
-Whenever someone forgets to lock his/her computer you are supposed to do something funny and memorable so that he/she learns to lock the computer when going away.
-This site is available on https://nikolockenvitz.de/troll and has links to some cool sites.
-It's recommended to switch to fullscreen and then select one of the offered sites.
 
 ### lock.pyw
 
