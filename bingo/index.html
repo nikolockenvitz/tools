@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bingo!</title>
+
+    <link rel="stylesheet" type="text/css" href="./style.css" />
+    <script src="pwa.js" type="application/javascript"></script>
+  </head>
+
+  <body>
+    <button onclick="openDialogNewGame()">New Game</button>
+    <dialog id="dialog-modal-new-game">
+      <p>New Game</p>
+
+      <label for="input-new-game-min">Min</label>
+      <input type="text" inputmode="numeric" pattern="-?\d*" id="input-new-game-min" value="1" />
+      <br /><br />
+
+      <label for="input-new-game-max">Max</label>
+      <input type="text" inputmode="numeric" pattern="-?\d*" id="input-new-game-max" value="75" />
+      <br /><br />
+
+      <button onclick="closeDialogNewGame()">Cancel</button>
+      <button onclick="startNewGame()">Start</button>
+    </dialog>
+
+    <p id="game-settings"></p>
+    <p id="current-number"></p>
+    <button id="btn-next-number" onclick="nextNumber()">Next</button>
+    <div id="history-numbers"></div>
+
+    <script src="./main.js" type="text/javascript" defer></script>
+  </body>
+</html>

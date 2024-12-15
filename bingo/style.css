@@ -1,0 +1,29 @@
+body {
+  background: #222;
+  color: #ccc;
+  text-align: center;
+  font-family: Tahoma, Verdana, sans-serif;
+  font-size: 16px;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+#current-number {
+  font-size: 8rem;
+}
+
+div#history-numbers {
+  margin: 2.5rem 0;
+}
+
+dialog#dialog-modal-new-game {
+  border-radius: 1rem;
+  border: 1px solid blue;
+  background: #eee;
+}
+dialog#dialog-modal-new-game::backdrop {
+  background: #000000aa;
+}
