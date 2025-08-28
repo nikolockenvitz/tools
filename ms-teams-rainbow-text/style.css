@@ -1,0 +1,236 @@
+body {
+  background: #333;
+  color: #ccc;
+  font-family: Arial, Helvetica, sans-serif;
+  text-align: center;
+}
+
+#input {
+  background: #666;
+  color: #fff;
+  width: 94vw;
+  height: 7em;
+  font-family: Arial, Helvetica, sans-serif;
+  resize: none;
+  overflow: hidden;
+  border: none;
+  padding: 1vw;
+  border-radius: 12px;
+  display: block;
+  margin: 2em auto 0;
+  outline: none;
+}
+
+#container {
+  z-index: 2;
+  position: absolute;
+  width: 100%;
+  min-height: 100%;
+  top: 0;
+  left: 0;
+  background-color: inherit;
+}
+#output {
+  color: #ccc;
+  font-size: 2em;
+  text-align: center;
+  word-wrap: break-word;
+  margin: 1em;
+}
+
+/* switch */
+.switch-container {
+  color: #aaa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 2em 0;
+}
+.switch-container span.option-label {
+  margin: 8px;
+  flex-grow: 1;
+  flex-basis: 1px;
+  text-align: left;
+}
+.switch-container span.option-label:first-child {
+  text-align: right;
+}
+.switch-container span.option-label.selected {
+  color: #fff;
+  -webkit-transition: 0.4s;
+  transition: 0.4s;
+}
+
+/* https://www.w3schools.com/howto/howto_css_switch.asp */
+/* The switch - the box around the slider */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+/* Hide default HTML checkbox */
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* The slider */
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #888;
+  -webkit-transition: 0.4s;
+  transition: 0.4s;
+}
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: #fff;
+  -webkit-transition: 0.4s;
+  transition: 0.4s;
+}
+
+input:checked + .slider {
+  background-color: #6699ff;
+}
+input:focus + .slider {
+  box-shadow: 0 0 1px #6699ff;
+}
+input:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 34px;
+}
+.slider.round:before {
+  border-radius: 50%;
+}
+
+/* https://codepen.io/nourabusoud/pen/ypZzMM */
+.bubbly-button {
+  display: inline-block;
+  font-size: 16px;
+  padding: 1em 2em;
+  margin: 0 auto;
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: #6699ff;
+  color: #fff;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  transition: transform ease-in 0.1s, box-shadow ease-in 0.25s;
+  box-shadow: 0 2px 25px rgba(255, 0, 130, 0.5);
+}
+.bubbly-button:focus {
+  outline: 0;
+}
+button::-moz-focus-inner {
+  padding: 0;
+  border: 0;
+}
+
+.bubbly-button:before,
+.bubbly-button:after {
+  position: absolute;
+  content: "";
+  display: block;
+  width: 140%;
+  height: 100%;
+  left: -20%;
+  z-index: -1000;
+  transition: all ease-in-out 0.5s;
+  background-repeat: no-repeat;
+}
+
+.bubbly-button:before {
+  display: none;
+  top: -75%;
+  background-image: radial-gradient(circle, #6699ff 20%, transparent 20%),
+    radial-gradient(circle, transparent 20%, #6699ff 20%, transparent 30%),
+    radial-gradient(circle, #6699ff 20%, transparent 20%),
+    radial-gradient(circle, #6699ff 20%, transparent 20%),
+    radial-gradient(circle, transparent 10%, #6699ff 15%, transparent 20%),
+    radial-gradient(circle, #6699ff 20%, transparent 20%),
+    radial-gradient(circle, #6699ff 20%, transparent 20%),
+    radial-gradient(circle, #6699ff 20%, transparent 20%),
+    radial-gradient(circle, #6699ff 20%, transparent 20%);
+  background-size: 10% 10%, 20% 20%, 15% 15%, 20% 20%, 18% 18%, 10% 10%, 15% 15%,
+    10% 10%, 18% 18%;
+}
+
+.bubbly-button:after {
+  display: none;
+  bottom: -75%;
+  background-image: radial-gradient(circle, #6699ff 20%, transparent 20%),
+    radial-gradient(circle, #6699ff 20%, transparent 20%),
+    radial-gradient(circle, transparent 10%, #6699ff 15%, transparent 20%),
+    radial-gradient(circle, #6699ff 20%, transparent 20%),
+    radial-gradient(circle, #6699ff 20%, transparent 20%),
+    radial-gradient(circle, #6699ff 20%, transparent 20%),
+    radial-gradient(circle, #6699ff 20%, transparent 20%);
+  background-size: 15% 15%, 20% 20%, 18% 18%, 20% 20%, 15% 15%, 10% 10%, 20% 20%;
+}
+
+.bubbly-button.touch-start {
+  transform: scale(0.9);
+  background-color: darken(#6699ff, 5%);
+  box-shadow: 0 2px 25px rgba(255, 0, 130, 0.2);
+}
+
+.bubbly-button.animate:before {
+  display: block;
+  animation: topBubbles ease-in-out 0.75s forwards;
+}
+.bubbly-button.animate:after {
+  display: block;
+  animation: bottomBubbles ease-in-out 0.75s forwards;
+}
+
+@keyframes topBubbles {
+  0% {
+    background-position: 5% 90%, 10% 90%, 10% 90%, 15% 90%, 25% 90%, 25% 90%,
+      40% 90%, 55% 90%, 70% 90%;
+  }
+  50% {
+    background-position: 0% 80%, 0% 20%, 10% 40%, 20% 0%, 30% 30%, 22% 50%,
+      50% 50%, 65% 20%, 90% 30%;
+  }
+  100% {
+    background-position: 0% 70%, 0% 10%, 10% 30%, 20% -10%, 30% 20%, 22% 40%,
+      50% 40%, 65% 10%, 90% 20%;
+    background-size: 0% 0%, 0% 0%, 0% 0%, 0% 0%, 0% 0%, 0% 0%;
+  }
+}
+
+@keyframes bottomBubbles {
+  0% {
+    background-position: 10% -10%, 30% 10%, 55% -10%, 70% -10%, 85% -10%,
+      70% -10%, 70% 0%;
+  }
+  50% {
+    background-position: 0% 80%, 20% 80%, 45% 60%, 60% 100%, 75% 70%, 95% 60%,
+      105% 0%;
+  }
+  100% {
+    background-position: 0% 90%, 20% 90%, 45% 70%, 60% 110%, 75% 80%, 95% 70%,
+      110% 10%;
+    background-size: 0% 0%, 0% 0%, 0% 0%, 0% 0%, 0% 0%, 0% 0%;
+  }
+}
